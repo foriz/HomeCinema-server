@@ -7,8 +7,21 @@ The main idea is streaming movies & series across different devices in LAN, usin
 different protocols. Server will recognize subfolders containing movies from a list
 of folders.
 
-For now, structure for movies will be implemented. The server will search in depth=1 for
-all subfolders in given directories.
+For now, structure for movies will be implemented. As movie will be considered a video file
+inside a folder. The server will search in depth=1 for all subfolders in given directories.
+
+File System Schema for Movies Support:
+
+(root_movies_folder)
+|
+|--(Movie #1)
+|  |--movie_file.mp4
+|  |--subtitle_file.srt
+|
+|--(Movie #2)
+|  |--movie_file.mp4
+|  |--(Subs)
+|     |--(subtitle_file.srt)
 
 ## User Interface
 
@@ -16,7 +29,8 @@ all subfolders in given directories.
 - [ ] Implementation of simple UI for adding/deleting/selecting folders, where server will search for movies.
 - [ ] File reader module.
 - [ ] Integrate of RTP protocol for streaming video.
-- [ ] API for communication with clients.
+- [ ] API for communication with clients (discovery, info & sub sharing).
+- [ ] Support for .mp4 and .mkv video files.
 
 ## Future Ideas:
 - [ ] Linux development & testing.
@@ -24,3 +38,6 @@ all subfolders in given directories.
 - [ ] Protocol support for browsers (WebRTC ?)
 - [ ] Protocol support for Android applications & Smart TVs (?)
 - [ ] Protocol support for iOS application (Apple HLS? )
+- [ ] Mark as watched
+- [ ] Rating
+- [ ] Recommendation system
