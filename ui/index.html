@@ -18,15 +18,10 @@
             </div>
             <!-- buttons about settings/connections/monitor/notifications -->
             <div class="header-control">
-                <!-- TODO on hover, on click, selected css -->
-                <!-- TODO icon & listener -->
-                <img src="img/settings_24.png" id="settings_btn" alt="Settings" title="Settings">
-                <!-- TODO icon & listener -->
-                <img src="img/settings_24.png" id="connections_btn" alt="Connections" title="Connections">
-                <!-- TODO icon & listener -->
-                <img src="img/settings_24.png" id="monitor_btn" alt="Monitor" title="Monitor">
-                <!-- TODO icon & listener -->
-                <img src="img/settings_24.png" id="notifications_btn" alt="Notifications" title="Notifications">
+                <img src="img/settings.svg" id="settings_btn" alt="Settings" title="Settings" onclick="setToolActive(this)">
+                <img src="img/connections.svg" id="connections_btn" alt="Connections" title="Connections" onclick="setToolActive(this)">
+                <img src="img/monitor.svg" id="monitor_btn" alt="Monitor" title="Monitor" onclick="setToolActive(this)">
+                <img src="img/notifications.svg" id="notifications_btn" alt="Notifications" title="Notifications" onclick="setToolActive(this)">
             </div>
         </div>
 
@@ -69,11 +64,17 @@
                 <tr><td>test</td></tr>
             </table>
             -->
+
+            <!-- Modal Windows -->
+            <div id="modal" class="modal">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <!-- TODO: change modal content by button pressed -->
+            </div>
         </div>
 
         <div class="footer">
             <!-- TODO footer -->    
-            <h2>Footer</h2>
+            <h2>Footer Template</h2>
         </div>
     </body>
 </html>

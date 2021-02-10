@@ -3,7 +3,9 @@
     --header_btn_bg_color: white;
     --header_btn_txt_color: #432FBF;
     --header_btn_border_color: white;
+    --header_btn_hover_border_color: white;
     --header_btn_hover_bg_color: #ddd;
+    --header_btn_hover_bg_transparent_color: rgba(221,221,221,0.5);
     --header_btn_hover_txt_color: black;
     --header_btn_active_bg_color: #432FBF;
     --header_btn_active_txt_color: white;
@@ -118,7 +120,7 @@
     padding-left: 2%;
     padding-right: 2%;
 
-    float: right;
+    float: left;
 
     position: relative;
     display: inline-block;
@@ -138,57 +140,52 @@
     color: var(--header_btn_hover_txt_color);
 }
 
+.header-control img:hover {
+    cursor: pointer;
+    background-color: var(--header_btn_hover_bg_transparent_color);
+    border: 1px solid var(--header_btn_hover_border_color);
+    border-radius: 10px;
+}
+
+.close:hover {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
 /* Active Class */
 .header button.active {
     background-color: var(--header_btn_active_bg_color);
     color: var(--header_btn_active_txt_color);
 }
 
-
-
-
-
-/**** IMPLEMENTED - TO BE REMOVED
-.header-nav {
-    width: 350px;
-    height: 85px;
-
-    margin-right: 20px;
-    margin-left: 5px;
-
-    display: inline-block;
-    vertical-align: middle;
-    text-align: center;
-
-    border: 1px solid yellow;
-}
-
-.header button {
-    width: 100px;
-    height: 85px;
-
-    margin-right: 20px;
-    margin-left: 5px;
-
-    display: inline-block;
-    vertical-align: middle;
-    text-align: center;
-
-    text-align: center;
-    font-size: 18px;
-    
-    border: 2px solid var(--header_btn_border_color);
-    border-radius: 4px;
-
-    background-color: var(--header_btn_bg_color);
-    color: var(--header_btn_txt_color);
-}
-
-.header-control {
-    width: 20%;
-
-    display: inline-block;
-    vertical-align: middle;
-    text-align: right;
-}
-****************/
+/* Modal Windows */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 15%;
+    top: 15%;
+    width: 70%; /* Full width */
+    height: 70%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+  
+  /* Modal Content/Box */
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+  }
+  
+  /* The Close Button */
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
