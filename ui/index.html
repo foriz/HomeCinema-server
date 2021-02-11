@@ -14,56 +14,19 @@
             <!-- buttons about movies/series -->
             <div class="header-nav">
                 <button class="w3-button" id="movies_btn" onclick="moviesBtnClick()">Movies</button>
-                <button class="w3-button" id="series_btn" onclick="seriesBtnClick()">Series</button>
+                <button class="w3-button" id="series_btn" onclick="seriesBtnClick()" disabled>Series</button>
             </div>
             <!-- buttons about settings/connections/monitor/notifications -->
             <div class="header-control">
-                <img src="img/settings.svg" id="settings_btn" alt="Settings" title="Settings" onclick="setToolActive(this)">
-                <img src="img/connections.svg" id="connections_btn" alt="Connections" title="Connections" onclick="setToolActive(this)">
-                <img src="img/monitor.svg" id="monitor_btn" alt="Monitor" title="Monitor" onclick="setToolActive(this)">
-                <img src="img/notifications.svg" id="notifications_btn" alt="Notifications" title="Notifications" onclick="setToolActive(this)">
+                <img src="img/settings.svg" id="settings_btn" alt="Settings" title="Settings" onclick="setToolActive(this)" disabled>
+                <img src="img/connections.svg" id="connections_btn" alt="Connections" title="Connections" onclick="setToolActive(this)" disabled>
+                <img src="img/monitor.svg" id="monitor_btn" alt="Monitor" title="Monitor" onclick="setToolActive(this)" disabled>
+                <img src="img/notifications.svg" id="notifications_btn" alt="Notifications" title="Notifications" onclick="setToolActive(this)" disabled>
             </div>
         </div>
 
         <div class="content">
-            <h2>Main Table</h2>
-            <!--
-            <table class="w3-table-all">
-                <tr>
-                    <th>Locations</th>
-                </tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-                <tr><td>test</td></tr>
-            </table>
-            -->
+            <table class="w3-table-all" id="locations_table"></table>
 
             <!-- Modal Windows -->
             <div id="modal" class="modal">
@@ -73,8 +36,8 @@
         </div>
 
         <div class="footer">
-            <!-- TODO footer -->    
-            <h2>Footer Template</h2>
+            <p>Created by: Thanasis Priovolos<br>
+            <a href="mailto:apriovolos@outlook.com">apriovolos@outlook.com</a></p>
         </div>
     </body>
 </html>
