@@ -25,28 +25,5 @@ File System Schema for Movies Support:
 
 ## User Interface
 
-## TODO:
-### Server UI
-- [ ] HomeCinema logo.
-- [ ] Modal Windows for Tools in Header.
-- [ ] Disable click outside modal window, when it is shown.
-- [ ] Enable Series button in Header.
-- [ ] Add References for icons.
-
-## To Be Implemented
-- [ ] Implementation of simple UI for adding/deleting/selecting folders, where server will search for movies.
-- [ ] File reader module (Movies).
-- [ ] File reader module (Series).
-- [ ] Integrate of RTP protocol for streaming video.
-- [ ] API for communication with clients (discovery, info & sub sharing).
-- [ ] Support for .mp4 and .mkv video files.
-
-## Future Ideas:
-- [ ] Linux development & testing.
-- [ ] Protocol support for Windows, Linux & Raspberry (RTP ?)
-- [ ] Protocol support for browsers (WebRTC ?)
-- [ ] Protocol support for Android applications & Smart TVs (?)
-- [ ] Protocol support for iOS application (Apple HLS? )
-- [ ] Mark as watched
-- [ ] Rating
-- [ ] Recommendation system
+## Trello: 
+https://trello.com/b/3qHdTXFV/homecinema

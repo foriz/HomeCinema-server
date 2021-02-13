@@ -13,6 +13,7 @@
     --divider_color: white;
     --footer_bg_color: #d3d3d3;
     --content_bg_color: white;
+    --content_active_bg_color: #432FBF;
 }
 
 /* Main Components */
@@ -29,8 +30,6 @@
     overflow: hidden;
 
     background-color: var(--header_bg_color);
-
-    border: 1px solid red;
 }
 
 .content {
@@ -63,8 +62,6 @@
     overflow: hidden;
 
     background-color: var(--footer_bg_color);
-
-    border: 1px solid blue;
 }
 
 /* Header Elements */
@@ -162,7 +159,15 @@
     visibility: hidden;
 }
 
-/* Footer Elements */
+.content table tr td {
+    cursor: pointer;
+}
+
+.active_row {
+    color: var(--content_active_bg_color);
+    font-size: 18px;
+    font-weight: bold;
+}
 
 /* Hover */
 .header button:hover {

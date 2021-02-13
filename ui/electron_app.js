@@ -1,21 +1,7 @@
-/*
-const express = require('express');
-var app = express();
+const config = require('../core/config/config.json')
 
-app.listen(3100, () => {
-
-});
-
-// API request for discovery connection & heartbeat
-app.get("/ping", (req, res, next) => {
-  res.json({
-    "response": "pong"
-  });
-});
-*/
-
-/**/
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
+const server = require('../core/app.js');
 
 function createWindow () {
   const win = new BrowserWindow({
@@ -27,7 +13,8 @@ function createWindow () {
     }
   })
 
-  win.loadFile('ui/index.html')
+  win.loadFile('ui/admin.html')
+  //win.webContents.openDevTools()
 }
 
 app.whenReady().then(createWindow)
@@ -41,5 +28,14 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow()
+  }
+})
+
+ipcMain.on('synchronous-message', (event, arg) => {
+  if(arg == 'config') {
+    event.returnValue = config
+  }
+  else  {
+    return null
   }
 })
