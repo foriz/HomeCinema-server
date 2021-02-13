@@ -12,16 +12,16 @@ inside a folder. The server will search in depth=1 for all subfolders in given d
 
 File System Schema for Movies Support:
 
-(root_movies_folder)
-|
-|--(Movie #1)
-|  |--movie_file.mp4
-|  |--subtitle_file.srt
-|
-|--(Movie #2)
-|  |--movie_file.mp4
-|  |--(Subs)
-|     |--(subtitle_file.srt)
+(root_movies_folder)<br/>
+|<br/>
+|--(Movie #1)<br/>
+|  |--movie_file.mp4<br/>
+|  |--subtitle_file.srt<br/>
+|<br/>
+|--(Movie #2)<br/>
+|  |--movie_file.mp4<br/>
+|  |--(Subs)<br/>
+|     |--(subtitle_file.srt)<br/>
 
 ## User Interface
 
