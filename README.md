@@ -21,7 +21,7 @@ File System Schema for Movies Support:
 |--(Movie #2)<br/>
 |&nbsp;&nbsp;|--movie_file.mp4<br/>
 |&nbsp;&nbsp;|--(Subs)<br/>
-|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--(subtitle_file.srt)<br/>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--subtitle_file.srt<br/>
 
 ## User Interface
 
