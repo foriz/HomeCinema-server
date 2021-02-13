@@ -15,13 +15,13 @@ File System Schema for Movies Support:
 (root_movies_folder)<br/>
 |<br/>
 |--(Movie #1)<br/>
-|  |--movie_file.mp4<br/>
-|  |--subtitle_file.srt<br/>
+|&nbsp;&nbsp;|--movie_file.mp4<br/>
+|&nbsp;&nbsp;|--subtitle_file.srt<br/>
 |<br/>
 |--(Movie #2)<br/>
-|  |--movie_file.mp4<br/>
-|  |--(Subs)<br/>
-|     |--(subtitle_file.srt)<br/>
+|&nbsp;&nbsp;|--movie_file.mp4<br/>
+|&nbsp;&nbsp;|--(Subs)<br/>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--(subtitle_file.srt)<br/>
 
 ## User Interface
 
