@@ -6,10 +6,11 @@ const server = require('../core/app.js');
 function createWindow () {
   const win = new BrowserWindow({
     width: 800,
-    height: 600,
+    height: 760,
     resizable: false,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      enableRemoteModule: true
     }
   })
 

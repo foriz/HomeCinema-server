@@ -24,6 +24,7 @@ File System Schema for Movies Support:
 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--subtitle_file.srt<br/>
 
 ## User Interface
+![alt text](https://github.com/foriz/homecinema-server/blob/master/screenshots/server-ui.png?raw=true)
 
 ## Trello: 
 https://trello.com/b/3qHdTXFV/homecinema

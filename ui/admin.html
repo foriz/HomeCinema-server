@@ -26,7 +26,13 @@
         </div>
 
         <div class="content">
+            <input id="dir_selector" type="file" style="display: none;" webkitdirectory directory />
+
             <table class="w3-table-all" id="locations_table"></table>
+            <div class="content-control">
+                <img src="img/add.svg" id="add_btn" alt="Add Path" title="Add Path" onclick="updatePaths('add')">
+                <img src="img/delete.svg" id="delete_btn" alt="Delete Selected Path" title="Delete Selected Path" onclick="updatePaths('remove')">
+            </div>
 
             <!-- Modal Windows -->
             <div id="modal" class="modal">
@@ -36,8 +42,7 @@
         </div>
 
         <div class="footer">
-            Created by: Thanasis Priovolos<br>
-            <a href="mailto:apriovolos@outlook.com">apriovolos@outlook.com</a><br><br>
+            Created by: Thanasis Priovolos (mailto: <a href="mailto:apriovolos@outlook.com">apriovolos@outlook.com</a>)<br>
             Icons made by 
                 <a href="https://www.freepik.com" target="_blank" title="Freepik">Freepik</a>, 
                 <a href="https://www.flaticon.com/authors/becris" target="_blank" title="Becris">Becris</a> & 

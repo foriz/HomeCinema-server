@@ -3,6 +3,8 @@ const { ipcRenderer } = require("electron")
 var movies_btn = null;
 var series_btn = null;
 
+var dir_selector = null;
+
 var tools_buttons = ["settings_btn", "connections_btn", "monitor_btn", "notifications_btn"];
 
 var isModalShown = false;
@@ -59,12 +61,12 @@ function fillTable(dirs) {
     for(var i=0;i<dirs.length;i++) {
         var div = document.createElement("div");
         div.innerHTML = dirs[i];
-        div.addEventListener("click", changeActiveRow);
 
         var td = document.createElement("td");
         td.appendChild(div);
         
         var tr = document.createElement("tr");
+        tr.addEventListener("click", changeActiveRow);
         tr.appendChild(td);
 
         body.appendChild(tr);
@@ -141,7 +143,9 @@ function moviesBtnClick() {
     movies_btn.classList.add("active");
     series_btn.classList.remove("active");
 
-    dirs = requestApi("GET", "/dirs", "Cannot fetch saved locations for movies & series.");
+    // TODO: change
+    dirs = requestApi("GET", "/ping", "");
+    //dirs = requestApi("GET", "/dirs", "Cannot fetch saved locations for movies & series.");
 
     cleanTable();
     initializeTable("Movies");
@@ -171,15 +175,103 @@ function changeActiveRow(evt) {
     evt.srcElement.classList.add("active_row");
 }
 
+function updatePaths(operation) {
+    // Check if movies or series are shown
+    var dirs_to_change = null;
+    var update_route_dst = null;
+    var update_route_op = null;    
+
+    if(hasClass(movies_btn, "active")) {
+        dirs_to_change = dirs["movies"];
+        update_route_dst = "/movies";
+    }
+    else if(hasClass(series_btn, "active")) {
+        dirs_to_change = dirs["series"];
+        update_route_dst = "/series"
+    }
+
+    if(operation == "add") {
+        update_route_op = "_add"
+        //dir_selector.click();
+
+        const {dialog} = require('electron').remote;
+        var selected_path = dialog.showOpenDialogSync({
+            properties: ['openDirectory']
+        });
+
+        dirs_to_change.push(selected_path);
+    }
+    else if(operation == "remove") {
+        if(document.getElementsByClassName("active_row").length == 0) {
+            alert("No path selected. Nothing will be deleted");
+            return
+        }
+
+        update_route_op = "_remove"
+
+        // Get selected row
+        var active_elem = document.getElementsByClassName("active_row")[0];    
+
+        // Find index of selected element
+        var index_to_delete = dirs_to_change.indexOf(active_elem.innerHTML)
+
+        // Delete selected element
+        if (index_to_delete > -1) {
+            dirs_to_change.splice(index_to_delete, 1);
+        }
+    }
+    else {
+        console.error("Invalid operation")
+    }
+
+    cleanTable();
+
+    if(hasClass(movies_btn, "active")) {
+        dirs["movies"] = dirs_to_change;
+
+        initializeTable("Movies");
+        fillTable(dirs["movies"]);
+    }
+    else if(hasClass(series_btn, "active")) {
+        dirs["series"] = dirs_to_change;
+
+        initializeTable("Series");
+        fillTable(dirs["series"]);
+    }
+
+    update_route = "dirs" + update_route_op + update_route_dst
+
+    // Async make request to server to update db
+    if(update_route != null) {
+        requestApiAsync("PATCH", update_route, "Cannot update directories")
+    }
+}
+
 function requestApi(type, route, error_msg) {
     let request = new XMLHttpRequest();
     request.open(type, SERVER_URL + route, false);
     request.send();
     if(request.status == 200) {
-        return JSON.parse(request.response);
+        // TODO: change
+        //return JSON.parse(request.response);
+        return JSON.parse('{"movies": ["K:/Movies", "F:/Movies"]}');
     }
     else {
         alert("[ERROR " + request.status + "][" + request.statusText + "]: " + error_msg);
         return null;
+    }
+}
+
+function requestApiAsync(type, route, error_msg) {
+    let request = new XMLHttpRequest();
+    request.open(type, SERVER_URL + route, false);
+    request.send();
+    request.onload = function() {
+        if(request.status == 200) {
+            console.log("Async requested completed successfully");
+        }
+        else {
+            console.log("[ERROR " + request.status + "][" + request.statusText + "]: " + error_msg);
+        }
     }
 }
