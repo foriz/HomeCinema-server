@@ -1,6 +1,9 @@
 const express = require('express');
 var app = express();
 
+// Initialize connection with MongoDB
+const mongodb = require('./utils/mongodb.js');
+
 app.listen(3100, () => {
 
 });
