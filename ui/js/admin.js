@@ -143,9 +143,7 @@ function moviesBtnClick() {
     movies_btn.classList.add("active");
     series_btn.classList.remove("active");
 
-    // TODO: change
-    dirs = requestApi("GET", "/ping", "");
-    //dirs = requestApi("GET", "/dirs", "Cannot fetch saved locations for movies & series.");
+    dirs = requestApi("GET", "/dirs", "Cannot fetch saved locations for movies & series.");
 
     cleanTable();
     initializeTable("Movies");
@@ -239,7 +237,7 @@ function updatePaths(operation) {
         fillTable(dirs["series"]);
     }
 
-    update_route = "dirs" + update_route_op + update_route_dst
+    update_route = "/dirs" + update_route_op + update_route_dst
 
     // Async make request to server to update db
     if(update_route != null) {
@@ -252,9 +250,7 @@ function requestApi(type, route, error_msg) {
     request.open(type, SERVER_URL + route, false);
     request.send();
     if(request.status == 200) {
-        // TODO: change
-        //return JSON.parse(request.response);
-        return JSON.parse('{"movies": ["K:/Movies", "F:/Movies"]}');
+        return JSON.parse(request.response);
     }
     else {
         alert("[ERROR " + request.status + "][" + request.statusText + "]: " + error_msg);

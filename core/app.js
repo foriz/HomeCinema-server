@@ -4,6 +4,12 @@ var app = express();
 // Initialize connection with MongoDB
 const mongodb = require('./utils/mongodb.js');
 
+// Routers
+var dirsRouter = require('./api/dirsRouter')
+
+app.use('/dirs', dirsRouter)
+
+// Start server
 app.listen(3100, () => {
 
 });
