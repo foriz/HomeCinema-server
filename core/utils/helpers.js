@@ -1,4 +1,5 @@
 const fs = require("fs");
+const fe = require('file-encoding');
 
 const dirsModel = require("../models/dirsModel");
 const movieModel = require("../models/movieModel");
@@ -122,4 +123,33 @@ async function addMoviesFromLocation(loc, existingMovies) {
     }
 
     return m;
+}
+
+exports.createSubBlob = async function (sub) {
+    const subFile = fe(sub["path"]);
+    return new Promise((resolve, reject) => {
+        subFile.detect()
+            .then((encoding) => {
+                // Detect subtitles file encoding
+                sub["encoding"] = encoding;
+                
+                // Read subtitles file        
+                var buffer = fs.readFileSync(sub["path"]);
+                
+                // Encode file to Base64
+                sub["base64_encoded"] = buffer.toString("base64");
+                resolve(sub);
+            })
+            .catch((err) => {
+                // Set UTF-8 as default encoding for sub
+                sub["encoding"] = "UTF-8";
+                
+                // Read subtitles file        
+                var buffer = fs.readFileSync(sub["path"]);
+                
+                // Encode file to Base64
+                sub["base64_encoded"] = buffer.toString("base64");
+                resolve(sub);
+            });
+    });
 }

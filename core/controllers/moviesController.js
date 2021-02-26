@@ -57,31 +57,48 @@ exports.getMovieInfo = async function(req, res) {
         })
         .catch((err) => {
             res.setHeader("Content-Type", "application/json");
-                    res.json( err );
+            res.json( err );
         })
 };
 
 // Get info about available subs (param: movie_id)
 exports.getMovieSubs = async function(req, res) {
+    const movId = req.query.mov_id;
+    
+    // Get movie info
+    dbController.getRecord(movieModel, movId)
+        .then((mInfo) => {
+            promises = [];
+            mInfo["subs"].forEach((sub) => {
+                promises.push(helpers.createSubBlob(sub))
+            });     
 
+            Promise.all(promises)
+                .then((blobs) => {
+                    res.setHeader("Content-Type", "application/json");
+                    res.json( blobs );
+                })
+                .catch((err) => {
+                    res.setHeader("Content-Type", "application/json");
+                    res.json( err );
+                });
+        })
+        .catch((err) => {
+            res.setHeader("Content-Type", "application/json");
+            res.json( err );
+        })
 };
 
 // Stream movie (param: movie_id)
 exports.streamMovie = async function(req, res) {
-
-};
-
-
-/*
-exports.getAllDirs = async function(req, res) {
-    dbController.getAllCollection(dirsModel)
-        .then((dirs) => {
-            res.setHeader("Content-Type", "application/json");
-            res.json( dirs );
+    const movId = req.query.mov_id;
+    
+    // Get movie info
+    dbController.getRecord(movieModel, movId)
+        .then((mInfo) => {
+            
         })
         .catch((err) => {
-            res.setHeader("Content-Type", "application/json");
-            res.json({ "error": err });
+
         });
 };
-*/
