@@ -1,26 +1,26 @@
-import mongoose from 'mongoose';
+let mongoose = require("mongoose");
 
 let seriesSchema = new mongoose.Schema({
     name: {
-        type: string,
-        required: [true, 'Please enter a name for the series.'],
+        type: String,
+        required: [true, "Please enter a name for the series."],
     },
     path: {
-        type: string,
-        required: [true, 'Enter location of the series.'],   
+        type: String,
+        required: [true, "Enter location of the series."],   
     },
     seasons: {
-        type: number
+        type: Number
     },
     episodes: {
-        type: number
+        type: Number
     },
     description: {
-        type: string
+        type: String
     },
     tags: {
-        type: string
+        type: String
     }
 });
 
-module.exports = mongoose.model('Series', seriesSchema)
+module.exports = mongoose.model("Series", seriesSchema)

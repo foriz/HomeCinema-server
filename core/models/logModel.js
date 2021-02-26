@@ -1,21 +1,21 @@
-import mongoose from 'mongoose';
+let mongoose = require("mongoose")
 
 let logSchema = new mongoose.Schema({
     timestamp: {
-        type: number,
-        required: [true, 'Please enter timestamp of the log creation.']
+        type: Number,
+        required: [true, "Please enter timestamp of the log creation."]
     },
     route: {
-        type: string,
-        required: [true, 'Please enter the API route, which logs.']
+        type: String,
+        required: [true, "Please enter the API route, which logs."]
     },
-    route: {
-        type: string,
-        required: [true, 'Please enter connection source for the log.']
+    source: {
+        type: String,
+        required: [true, "Please enter connection source for the log."]
     },
     msg: {
-        type: string
+        type: String
     },
 });
 
-module.exports = mongoose.model('Log', logSchema);
+module.exports = mongoose.model("Log", logSchema);

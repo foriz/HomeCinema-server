@@ -1,13 +1,13 @@
-import mongoose from 'mongoose';
+let mongoose = require("mongoose");
 
 let notificationSchema = new mongoose.Schema({
     timestamp: {
-        type: number,
-        required: [true, 'Please enter timestamp of the notification.']
+        type: Number,
+        required: [true, "Please enter timestamp of the notification."]
     },
     msg: {
-        type: string
+        type: String
     },
 });
 
-module.exports = mongoose.model('Notification', notificationSchema);
+module.exports = mongoose.model("Notification", notificationSchema);

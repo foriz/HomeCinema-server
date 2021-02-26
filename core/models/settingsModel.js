@@ -1,13 +1,13 @@
-import mongoose from 'mongoose';
+let mongoose = require("mongoose");
 
 let settingsSchema = new mongoose.Schema({
     server: {
-        type: string
+        type: String
     },
     protocol: {
-        type: string,
-        required: [true, 'Please enter default protocol for streaming.']
+        type: String,
+        required: [true, "Please enter default protocol for streaming."]
     },
 });
 
-module.exports = mongoose.model('Settings', settingsSchema);
+module.exports = mongoose.model("Settings", settingsSchema);

@@ -1,328 +1,212 @@
-let dirsModel = require('../models/dirsModel')
+let dirsModel = require("../models/dirsModel")
+let dbController = require("../controllers/mongoDbController")
 
 // Get a json array with all dirs for movies & series
-exports.getAllDirs = function(req, res) {
-    res.setHeader('Content-Type', 'application/json');
-    dirsModel.find({}, function(err, result) {
-        if(err) {
-            res.json({
-                "error": err
-            });
-        }
-        else {
-            res.json({
-                "result": result
-            });
-        }
-    });
+exports.getAllDirs = async function(req, res) {
+    dbController.getAllCollection(dirsModel)
+        .then((dirs) => {
+            res.setHeader("Content-Type", "application/json");
+            res.json( dirs );
+        })
+        .catch((err) => {
+            res.setHeader("Content-Type", "application/json");
+            res.json({ "error": err });
+        });
 };
 
 // Get a json contains dirs only for movies
-exports.getMoviesDirs = function(req, res) {
-    res.setHeader('Content-Type', 'application/json');
-    dirsModel.find({}, function(err, result) {
-        if(err) {
-            res.json({
-                "error": err
-            });
-        }
-        else {
-            res.json({
-                "result": result[0]['movies']
-            });
-        }
-    });
+exports.getMoviesDirs = async function(req, res) {
+    dbController.getSubCollection(dirsModel, "movies")
+        .then((movies) => {
+            res.setHeader("Content-Type", "application/json");
+            res.json( movies ); 
+        })
+        .catch((err) => {
+            res.setHeader("Content-Type", "application/json");
+            res.json({ "error": err });
+        });
 };
 
 // Add a new movie location in dirs['movies'] json
-exports.addMovieLocation = function(req, res) {
-    const locationToAdd = req.query.path
-
-    res.setHeader('Content-Type', 'application/json');
-    dirsModel.find({}, function(err, result) {
-        if(err) {
-            res.json({
-                "error": err
-            });
-        }
-        else {
-            if(result.length == 0) {
+exports.addMovieLocation = async function(req, res) {
+    const locationToAdd = req.query.path;
+    dbController.getAllCollection(dirsModel)
+        .then((dirs) => {
+            if(dirs.length == 0) {
                 // There is no record in db. Create a new one
-                let init = new dirsModel({
+                let newDirs = new dirsModel({
                     movies: [locationToAdd],
                     series: []
                 });  
-
-                init.save()
-                    .then(doc => {
-                        console.log('New movies location added: \n'+doc);
-                        res.json({
-                            "success": "Movies locations updated!"
-                        });
+        
+                dbController.insertRecord(newDirs)
+                    .then((insertResult) => {
+                        res.setHeader("Content-Type", "application/json");
+                        res.json( insertResult );
                     })
-                    .catch(err => {
-                        console.error('An error occured when inserting new locations: '+err);
-                        res.json({
-                            "error": err
-                        });
-                    })
+                    .catch((insertResultError) => {
+                        res.setHeader("Content-Type", "application/json");
+                        res.json( insertResultError );
+                    });
             }
             else {
                 // Update existing record, if given path does not exists already
-                const docId = result[0]['_id'];
-                var moviesArr = result[0]['movies'];
+                const docId = dirs[0]["_id"];
+                var moviesArr = dirs[0]["movies"];
                 
                 // Check if exists. If exists, do nothing
                 if(moviesArr.indexOf(locationToAdd) > -1) {
-                    res.json({
-                        "success": "Movies locations are not updated, because location already exists!"
-                    });
+                    res.setHeader("Content-Type", "application/json");
+                    res.json({ "success": "Movies locations are not updated, because location already exists!" });
                 }
                 else {
                     moviesArr.push(locationToAdd);
-
-                    dirsModel
-                        .findOneAndUpdate( 
-                            { 
-                                _id: docId
-                            }, 
-                            { 
-                                movies: moviesArr
-                            },
-                            {
-                                new: true,
-                                runValidators: true
-                            })
-                        .then(doc => {
-                            console.log('Movies locations updated: \n'+doc)
-                            res.json({
-                                "success": "Movies locations updated!"
-                            });
+                    dbController.updateRecord(dirsModel, docId, "movies", moviesArr)
+                        .then((updateResult) => {
+                            res.setHeader("Content-Type", "application/json");
+                            res.json( updateResult );
                         })
-                        .catch(err => {
-                            console.error('An error occured when inserting new locations: '+err)
-                            res.json({
-                                "error": err
-                            });
-                        })
-
-                    res.json({
-                        "success": "Movies locations updated!"
-                    });
+                        .catch((updateResultError) => {
+                            res.setHeader("Content-Type", "application/json");
+                            res.json( updateResultError );
+                        });
                 }
             }
-        }
-    });
+        })
+        .catch((err) => {
+            res.setHeader("Content-Type", "application/json");
+            res.json({ "error": err });
+        });
 };
 
 // Delete a new movie location in dirs['movies'] json
-exports.deleteMovieLocation = function(req, res) {
+exports.deleteMovieLocation = async function(req, res) {
     const locationToRemove = req.query.path
-
-    res.setHeader('Content-Type', 'application/json');
-    dirsModel.find({}, function(err, result) {
-        if(err) {
-            res.json({
-                "error": err
-            });
-        }
-        else {
+    dbController.getAllCollection(dirsModel)
+        .then((dirs) => {
             // Check if record exists. If exists, remove it
-            const docId = result[0]['_id'];
-            var moviesArr = result[0]['movies'];
+            const docId = dirs[0]["_id"];
+            var moviesArr = dirs[0]["movies"];
 
-            // Check if exists. If exists, do nothing
             locationToRemoveIdx = moviesArr.indexOf(locationToRemove)
             if(locationToRemoveIdx > -1) {
                 moviesArr.splice(locationToRemoveIdx, 1);
-
-                dirsModel
-                        .findOneAndUpdate( 
-                            { 
-                                _id: docId
-                            }, 
-                            { 
-                                movies: moviesArr
-                            },
-                            {
-                                new: true,
-                                runValidators: true
-                            })
-                        .then(doc => {
-                            console.log('Movies locations updated: \n'+doc)
-                            res.json({
-                                "success": "Movies locations updated!"
-                            });
-                        })
-                        .catch(err => {
-                            console.error('An error occured when inserting new locations: '+err)
-                            res.json({
-                                "error": err
-                            });
-                        })
-
-                    res.json({
-                        "success": "Movies locations updated!"
+                dbController.updateRecord(dirsModel, docId, "movies", moviesArr)
+                    .then((deleteResult) => {
+                        res.setHeader("Content-Type", "application/json");
+                        res.json( deleteResult );
+                    })
+                    .catch((deleteResultError) => {
+                        res.setHeader("Content-Type", "application/json");
+                        res.json( deleteResultError );
                     });
             }
             else {
-                res.json({
-                    "success": "Movies locations are not updated, because location does not exists!"
-                });
+                res.setHeader("Content-Type", "application/json");
+                res.json({ "success": "Movies locations are not updated, because location does not exists!" });
             }
-        }
-    });
+        })
+        .catch((err) => {
+            res.setHeader("Content-Type", "application/json");
+            res.json({ "error": err });
+        });
 };
 
 // Get a json contains dirs only for series
-exports.getSeriesDirs = function(req, res) {
-    res.setHeader('Content-Type', 'application/json');
-    dirsModel.find({}, function(err, result) {
-        if(err) {
-            res.json({
-                "error": err
-            });
-        }
-        else {
-            res.json({
-                "result": result[0]['series']
-            });
-        }
-    });
+exports.getSeriesDirs = async function(req, res) {
+     dbController.getSubCollection(dirsModel, "series")
+        .then((series) => {
+            res.setHeader("Content-Type", "application/json");
+            res.json( series );
+        })
+        .catch((err) => {
+            res.setHeader("Content-Type", "application/json");
+            res.json({ "error": err });
+        });
 };
 
 // Add a new series location in dirs['series'] json
-exports.addSeriesLocation = function(req, res) {
-    const locationToAdd = req.query.path
-
-    res.setHeader('Content-Type', 'application/json');
-    dirsModel.find({}, function(err, result) {
-        if(err) {
-            res.json({
-                "error": err
-            });
-        }
-        else {
-            if(result.length == 0) {
+exports.addSeriesLocation = async function(req, res) {
+    const locationToAdd = req.query.path;
+    dbController.getAllCollection(dirsModel)
+        .then((dirs) => {
+            if(dirs.length == 0) {
                 // There is no record in db. Create a new one
-                let init = new dirsModel({
+                let newDirs = new dirsModel({
                     movies: [],
                     series: [locationToAdd]
                 });  
-
-                init.save()
-                    .then(doc => {
-                        console.log('New series location added: \n'+doc);
-                        res.json({
-                            "success": "Series locations updated!"
-                        });
+        
+                dbController.insertRecord(newDirs);
+                dbController.insertRecord(newDirs)
+                    .then((insertResult) => {
+                        res.setHeader("Content-Type", "application/json");
+                        res.json( insertResult );
                     })
-                    .catch(err => {
-                        console.error('An error occured when inserting new locations: '+err);
-                        res.json({
-                            "error": err
-                        });
-                    })
+                    .catch((insertResultError) => {
+                        res.setHeader("Content-Type", "application/json");
+                        res.json( insertResultError );
+                    });
             }
             else {
                 // Update existing record, if given path does not exists already
-                const docId = result[0]['_id'];
-                var seriesArr = result[0]['series'];
-
+                const docId = dirs[0]["_id"];
+                var seriesArr = dirs[0]["series"];
+                
                 // Check if exists. If exists, do nothing
                 if(seriesArr.indexOf(locationToAdd) > -1) {
-                    res.json({
-                        "success": "Series locations are not updated, because location already exists!"
-                    });
+                    res.setHeader("Content-Type", "application/json");
+                    res.json({ "success": "Series locations are not updated, because location already exists!" });
                 }
                 else {
                     seriesArr.push(locationToAdd);
-
-                    dirsModel
-                        .findOneAndUpdate( 
-                            { 
-                                _id: docId
-                            }, 
-                            { 
-                                series: seriesArr
-                            },
-                            {
-                                new: true,
-                                runValidators: true
-                            })
-                        .then(doc => {
-                            console.log('Series locations updated: \n'+doc)
-                            res.json({
-                                "success": "Series locations updated!"
-                            });
+                    dbController.updateRecord(dirsModel, docId, "series", seriesArr)
+                        .then((updateResult) => {
+                            res.setHeader("Content-Type", "application/json");
+                            res.json( updateResult );
                         })
-                        .catch(err => {
-                            console.error('An error occured when inserting new locations: '+err)
-                            res.json({
-                                "error": err
-                            });
-                        })
+                        .catch((updateResultError) => {
+                            res.setHeader("Content-Type", "application/json");
+                            res.json( updateResultError );
+                        });
                 }
             }
-        }
-    });
+        })
+        .catch((err) => {
+            res.setHeader("Content-Type", "application/json");
+            res.json({ "error": err });
+        });
 };
 
 // Delete a new series location in dirs['series'] json
-exports.deleteSeriesLocation = function(req, res) {
+exports.deleteSeriesLocation = async function(req, res) {
     const locationToRemove = req.query.path
-
-    res.setHeader('Content-Type', 'application/json');
-    dirsModel.find({}, function(err, result) {
-        if(err) {
-            res.json({
-                "error": err
-            });
-        }
-        else {
+    dbController.getAllCollection(dirsModel)
+        .then((dirs) => {
             // Check if record exists. If exists, remove it
-            const docId = result[0]['_id'];
-            var seriesArr = result[0]['series'];
+            const docId = dirs[0]["_id"];
+            var seriesArr = dirs[0]["series"];
 
-            // Check if exists. If exists, do nothing
             locationToRemoveIdx = seriesArr.indexOf(locationToRemove)
             if(locationToRemoveIdx > -1) {
                 seriesArr.splice(locationToRemoveIdx, 1);
-
-                dirsModel
-                        .findOneAndUpdate( 
-                            { 
-                                _id: docId
-                            }, 
-                            { 
-                                series: seriesArr
-                            },
-                            {
-                                new: true,
-                                runValidators: true
-                            })
-                        .then(doc => {
-                            console.log('Series locations updated: \n'+doc)
-                            res.json({
-                                "success": "Series locations updated!"
-                            });
-                        })
-                        .catch(err => {
-                            console.error('An error occured when inserting new locations: '+err)
-                            res.json({
-                                "error": err
-                            });
-                        })
-
-                    res.json({
-                        "success": "Series locations updated!"
+                dbController.updateRecord(dirsModel, docId, "series", seriesArr)
+                    .then((deleteResult) => {
+                        res.setHeader("Content-Type", "application/json");
+                        res.json( deleteResult );
+                    })
+                    .catch((deleteResultError) => {
+                        res.setHeader("Content-Type", "application/json");
+                        res.json( deleteResultError );
                     });
             }
             else {
-                res.json({
-                    "success": "Movies locations are not updated, because location does not exists!"
-                });
+                res.setHeader("Content-Type", "application/json");
+                res.json({ "success": "Series locations are not updated, because location does not exists!" });
             }
-        }
-    });
+        })
+        .catch((err) => {
+            res.setHeader("Content-Type", "application/json");
+            res.json({ "error": err });
+        });
 };

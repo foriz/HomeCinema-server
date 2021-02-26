@@ -1,23 +1,37 @@
-import mongoose from 'mongoose';
+let mongoose = require("mongoose");
 
 let movieSchema = new mongoose.Schema({
     name: {
-        type: string,
-        required: [true, 'Please enter a name for the movie.'],
+        type: String,
+        required: [true, "Please enter a name for the movie."],
     },
     path: {
-        type: string,
-        required: [true, 'Enter location of the movie.'],   
+        type: String,
+        unique : true,
+        required: [true, "Enter absolute path of the movie folder."],   
+    },
+    file: {
+        type: String,
+        required: [true, "Enter absolute path of the movie file."],   
     },
     length: {
-        type: number
+        type: Number
+    },
+    year: {
+        type: Number
     },
     description: {
-        type: string
+        type: String
     },
     tags: {
-        type: string
+        type: String
+    },
+    poster: {
+        type: String
+    },
+    subs: {
+        type: []
     }
 });
 
-module.exports = mongoose.model('Movie', movieSchema)
+module.exports = mongoose.model("Movie", movieSchema)

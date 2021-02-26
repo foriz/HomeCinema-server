@@ -2,7 +2,6 @@
   "name": "homecinema-server",
   "version": "0.1.0",
   "description": "Server for streaming videos",
-  "main": "ui/electron_app.js",
   "main": "core/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
