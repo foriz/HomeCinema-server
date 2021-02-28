@@ -26,5 +26,11 @@ File System Schema for Movies Support:
 ## User Interface
 ![alt text](https://github.com/foriz/HomeCinema-server/blob/main/screenshots/server-ui.png?raw=true)
 
+## Movie Streaming
+For now, movies can be streamed using VLC player, or any other player that can play a stream of binary data,
+using links in the following format as source:
+
+```http://<HOME_CINAME_SERVER_IP>:<HOME_CINAME_SERVER_PORT>/movies/stream?mov_id=<MONGO_DB_MOVIE_ID>```
+
 ## Trello: 
 https://trello.com/b/3qHdTXFV/homecinema

@@ -1,3 +1,5 @@
+var fs = require("fs");
+
 let movieModel = require("../models/movieModel")
 let dbController = require("../controllers/mongoDbController")
 let helpers = require("../utils/helpers")
@@ -91,14 +93,27 @@ exports.getMovieSubs = async function(req, res) {
 
 // Stream movie (param: movie_id)
 exports.streamMovie = async function(req, res) {
-    const movId = req.query.mov_id;
+    const movId = req.query["mov_id"];
     
-    // Get movie info
     dbController.getRecord(movieModel, movId)
         .then((mInfo) => {
+            var buffer = fs.readFileSync(mInfo["file"]);
             
+            res.setHeader("Content-Type", "video/mp4");
+            res.write(buffer);
+            res.end();
         })
         .catch((err) => {
-
+            res.setHeader("Content-Type", "application/json");
+            res.json( err );
         });
 };
+
+function toArrayBuffer(buf) {
+    var ab = new ArrayBuffer(buf.length);
+    var view = new Uint8Array(ab);
+    for (var i = 0; i < buf.length; ++i) {
+        view[i] = buf[i];
+    }
+    return ab;
+}

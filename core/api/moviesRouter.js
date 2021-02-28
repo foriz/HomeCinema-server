@@ -7,6 +7,6 @@ router.get("/list", moviesController.listMovies);
 router.get("/refresh", moviesController.refreshMovies);
 router.get("/info", moviesController.getMovieInfo);
 router.get("/subs", moviesController.getMovieSubs);
-//TODO: router.get("/stream", moviesController.streamMovie);
+router.get("/stream", moviesController.streamMovie);
 
 module.exports = router;
