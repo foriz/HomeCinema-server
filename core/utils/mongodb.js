@@ -1,7 +1,7 @@
 let mongoose = require("mongoose");
 const config = require("../config/config.json")
 
-const server = config["mongodb"]["host"] + ':' + config["mongodb"]["port"]
+const server = config["mongodb"]["host"] + ":" + config["mongodb"]["port"]
 const database = config["mongodb"]["db"];
 const username = config["mongodb"]["username"];
 const password = config["mongodb"]["password"];

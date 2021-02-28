@@ -1,6 +1,12 @@
 const express = require("express");
 var app = express();
 
+// Configuration files
+const config = require("./config/config.json");
+const server_ip = config["server"]["host"];
+const server_port = config["server"]["port"];
+const server_url = "http://" + server_ip + ":" + server_port;
+
 // Initialize connection with MongoDB
 const mongodb = require("./utils/mongodb.js");
 // Helper functions
@@ -19,14 +25,16 @@ const dbController = require("./controllers/mongoDbController.js");
 helpers.initializeContent(dbController)
     .then((initResult) => {
         // Start server
-        app.listen(3100, () => {
-            console.log("Started server");
+        app.listen(server_port, () => {
+            console.log("Started server ["+server_url+"]");
         });
 
         // API request for discovery connection & heartbeat
         app.get("/ping", (req, res, next) => {
             res.json({
-              "response": "pong"
+              "response": "pong",
+              "server_url": server_url,
+              "protocol": "binary"
             });
         });
     })
