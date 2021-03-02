@@ -32,5 +32,9 @@ using links in the following format as source:
 
 ```http://<HOME_CINAME_SERVER_IP>:<HOME_CINAME_SERVER_PORT>/movies/stream?mov_id=<MONGO_DB_MOVIE_ID>```
 
+Also, the same link can be opened through browser if HTML 5 is supported in your browser.
+
+For now, forward, backwards and time indexing operations are not supported, unless you stream through VLC player in localhost.
+
 ## Trello: 
 https://trello.com/b/3qHdTXFV/homecinema

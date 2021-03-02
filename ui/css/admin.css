@@ -14,6 +14,9 @@
     --footer_bg_color: #d3d3d3;
     --content_bg_color: white;
     --content_active_bg_color: #432FBF;
+    --loader_color: darkorange;
+    --loader_sec_color: #f3f3f3;
+    --loader_bg_color: white;
 }
 
 /* Main Components */
@@ -254,3 +257,92 @@ tr td div {
     font-size: 28px;
     font-weight: bold;
   }
+
+  /* Loader */
+.loader_wrapper {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0%;
+    top: 0%;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: var(--loader_bg_color) /* Black w/ opacity */
+}
+
+.loader {
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 40%;
+    top: 40%;
+    width: 120px;
+    height: 120px;
+    border: 16px solid var(--loader_sec_color);
+    border-radius: 50%;
+    border-top: 16px solid var(--loader_color);
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+}
+
+.loader_wrapper img {
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 35%;
+    top: 23%;
+    width: 181px;
+
+    text-align: center;
+
+    -webkit-animation: blink 2s;
+    -webkit-animation-iteration-count: infinite;
+    -moz-animation: blink 2s;
+    -moz-animation-iteration-count: infinite;
+    -o-animation: blink 2s;
+    -o-animation-iteration-count: infinite;
+}
+
+.loader_wrapper p {
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 40%;
+    top: 57%;
+    width: 120px;
+
+    text-align: center;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes blink {
+    0% { opacity: 1; transform: scale(1.0); }
+    50% { opacity: 0; transform: scale(1.5); }
+    100% { opacity: 1; transform: scale(1.0); }
+}
+
+@-webkit-keyframes blink {
+    0% { opacity: 1; transform: scale(1.0); }
+    50% { opacity: 0; transform: scale(1.5); }
+    100% { opacity: 1; transform: scale(1.0); }
+}
+
+@-moz-keyframes blink {
+    0% { opacity: 1; transform: scale(1.0); }
+    50% { opacity: 0; transform: scale(1.5); }
+    100% { opacity: 1; transform: scale(1.0); }
+}
+
+@-o-keyframes blink {
+    0% { opacity: 1; transform: scale(1.0); }
+    50% { opacity: 0; transform: scale(1.5); }
+    100% { opacity: 1; transform: scale(1.0); }
+}

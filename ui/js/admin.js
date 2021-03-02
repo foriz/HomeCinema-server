@@ -135,6 +135,16 @@ function closeModal() {
     isModalShown = false;
 }
 
+function showLoader() {
+    var loader = document.getElementById("loader_wrapper");
+    loader.style.display = "block";
+}
+
+function hideLoader() {
+    var loader = document.getElementById("loader_wrapper");
+    loader.style.display = "none";
+}
+
 function changeModalContent() {
     // TODO: change modal content based on tool clicked
 }
@@ -143,21 +153,34 @@ function moviesBtnClick() {
     movies_btn.classList.add("active");
     series_btn.classList.remove("active");
 
-    dirs = requestApi("GET", "/dirs", "Cannot fetch saved locations for movies & series.");
+    showLoader();
 
+    dirs = requestApi("GET", "/dirs/movies", "Cannot fetch saved locations for movies & series.");
+    
     cleanTable();
     initializeTable("Movies");
     if(dirs != null) {
-        fillTable(dirs['movies']);
+        fillTable(dirs);
     }
+
+    hideLoader();
 }
 
 function seriesBtnClick() {
     series_btn.classList.add("active");
     movies_btn.classList.remove("active");
 
+    showLoader();
+
+    dirs = requestApi("GET", "/dirs/series", "Cannot fetch saved locations for movies & series.");
+    
     cleanTable();
     initializeTable("Series");
+    if(dirs != null) {
+        fillTable(dirs);
+    }
+
+    hideLoader();
 }
 
 function changeActiveRow(evt) {
@@ -175,73 +198,55 @@ function changeActiveRow(evt) {
 
 function updatePaths(operation) {
     // Check if movies or series are shown
-    var dirs_to_change = null;
     var update_route_dst = null;
     var update_route_op = null;    
 
     if(hasClass(movies_btn, "active")) {
-        dirs_to_change = dirs["movies"];
         update_route_dst = "/movies";
     }
     else if(hasClass(series_btn, "active")) {
-        dirs_to_change = dirs["series"];
         update_route_dst = "/series"
     }
 
     if(operation == "add") {
-        update_route_op = "_add"
-        //dir_selector.click();
+        update_route_op = "/add"
 
         const {dialog} = require('electron').remote;
         var selected_path = dialog.showOpenDialogSync({
             properties: ['openDirectory']
         });
-
-        dirs_to_change.push(selected_path);
     }
-    else if(operation == "remove") {
+    else if(operation == "delete") {
         if(document.getElementsByClassName("active_row").length == 0) {
             alert("No path selected. Nothing will be deleted");
-            return
+            return;
         }
 
-        update_route_op = "_remove"
+        update_route_op = "/delete"
 
         // Get selected row
         var active_elem = document.getElementsByClassName("active_row")[0];    
-
-        // Find index of selected element
-        var index_to_delete = dirs_to_change.indexOf(active_elem.innerHTML)
-
-        // Delete selected element
-        if (index_to_delete > -1) {
-            dirs_to_change.splice(index_to_delete, 1);
-        }
+        var selected_path = active_elem.innerHTML;
     }
     else {
         console.error("Invalid operation")
+        return;
     }
 
-    cleanTable();
+    update_route = "/dirs" + update_route_dst + update_route_op + "?path=" + selected_path;
+    update_response = requestApi("PATCH", update_route, "Cannot update dirs locations.");
 
-    if(hasClass(movies_btn, "active")) {
-        dirs["movies"] = dirs_to_change;
-
-        initializeTable("Movies");
-        fillTable(dirs["movies"]);
+    console.log(update_response);
+    if(update_response.hasOwnProperty("success")) {
+        if(hasClass(movies_btn, "active")) {
+            moviesBtnClick();
+        }
+        else if(hasClass(series_btn, "active")) {
+            seriesBtnClick();
+        }
     }
-    else if(hasClass(series_btn, "active")) {
-        dirs["series"] = dirs_to_change;
-
-        initializeTable("Series");
-        fillTable(dirs["series"]);
-    }
-
-    update_route = "/dirs" + update_route_op + update_route_dst
-
-    // Async make request to server to update db
-    if(update_route != null) {
-        requestApiAsync("PATCH", update_route, "Cannot update directories")
+    else {
+        alert("Cannot update dirs locations");
     }
 }
 
@@ -255,19 +260,5 @@ function requestApi(type, route, error_msg) {
     else {
         alert("[ERROR " + request.status + "][" + request.statusText + "]: " + error_msg);
         return null;
-    }
-}
-
-function requestApiAsync(type, route, error_msg) {
-    let request = new XMLHttpRequest();
-    request.open(type, SERVER_URL + route, false);
-    request.send();
-    request.onload = function() {
-        if(request.status == 200) {
-            console.log("Async requested completed successfully");
-        }
-        else {
-            console.log("[ERROR " + request.status + "][" + request.statusText + "]: " + error_msg);
-        }
     }
 }
