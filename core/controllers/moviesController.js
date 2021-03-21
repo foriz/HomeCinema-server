@@ -94,11 +94,15 @@ exports.getMovieSubs = async function(req, res) {
 // Stream movie (param: movie_id)
 exports.streamMovie = async function(req, res) {
     const movId = req.query["mov_id"];
-    
+    //const startByte = (req.headers["range"].replace("bytes=", "")).split("-")[0]
+
     dbController.getRecord(movieModel, movId)
         .then((mInfo) => {
+            //res.setHeader("Content-Type", "video/mp4");
+            //fs.createReadStream(mInfo["file"], { start : startByte }).pipe(res);
+
             var buffer = fs.readFileSync(mInfo["file"]);
-            
+
             res.setHeader("Content-Type", "video/mp4");
             res.write(buffer);
             res.end();

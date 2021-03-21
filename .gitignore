@@ -103,5 +103,6 @@ dist
 # TernJS port file
 .tern-port
 
-# Releases folder. They will be uploaded in GitHub seperately
+# Releases & installers folder. They will be uploaded in GitHub seperately
 releases/
+installers/
