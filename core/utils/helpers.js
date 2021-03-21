@@ -1,10 +1,11 @@
 const fs = require("fs");
 const fe = require('file-encoding');
 
+const dbController = require("../controllers/mongoDbController");
+
 const dirsModel = require("../models/dirsModel");
 const movieModel = require("../models/movieModel");
-
-const dbController = require("../controllers/mongoDbController");
+const seriesModel = require("../models/seriesModel");
 
 // Initialize data for all movies & series in saved locations.
 // For each folder name in these paths save the following attributes:
@@ -36,6 +37,21 @@ exports.initializeMoviesOnly = async function (mongoDbController) {
     });
 }
 
+exports.initializeSeriesOnly = async function (mongoDbController) {
+    var dirs = await mongoDbController.getAllCollection(dirsModel);
+    var series = await mongoDbController.getAllCollection(seriesModel);
+
+    return new Promise((resolve, reject) => {
+        initializeSeries(dirs[0]["series"], series)
+            .then((init) => {
+                resolve(init);
+            })
+            .catch((err) => {
+                reject(err);
+            })
+    });
+}
+
 async function initializeMovies(movies, existingMovies) {
     var moviesArray = [];
     for(var i=0;i<movies.length;i++) {
@@ -56,6 +72,35 @@ async function initializeMovies(movies, existingMovies) {
     // Batch insert all collected movies in Database
     return new Promise((resolve, reject) => {
         dbController.insertBatchRecords(movieModel.collection, moviesArray)
+            .then((insertResult) => {
+                resolve(insertResult);
+            })
+            .catch((insertResultError) => {
+                reject(insertResultError);
+            });
+    });
+}
+
+async function initializeSeries(series, existingSeries) {
+    var seriesArray = [];
+    for(var i=0;i<series.length;i++) {
+        var locationToSearch = series[i];
+        // Check if given location exists
+        try {
+            fs.readdirSync(locationToSearch, { withFileTypes: true })
+
+            var locationSeriesArr = await addSeriesFromLocation(locationToSearch, existingSeries);
+            seriesArray.push(...locationSeriesArr);
+        }
+        catch (err) {
+            console.error(err);
+            continue;
+        }
+    }
+
+    // Batch insert all collected series in Database
+    return new Promise((resolve, reject) => {
+        dbController.insertBatchRecords(seriesModel.collection, seriesArray)
             .then((insertResult) => {
                 resolve(insertResult);
             })
@@ -124,6 +169,76 @@ async function addMoviesFromLocation(loc, existingMovies) {
 
     return m;
 }
+
+/****************************************************************************************************************************
+ ****************************************************************************************************************************
+ ****************************************************************************************************************************/
+
+// Add all folders found in the given location.
+/*
+async function addMoviesFromLocation(loc, existingMovies) {
+    var m = []
+    var moviesInLoc = fs.readdirSync(loc, { withFileTypes: true })
+    for(var i=0;i<moviesInLoc.length;i++) {
+        const movieName = moviesInLoc[i]["name"];
+        const moviePath = loc + movieName
+
+        // Check if subfolder exists.
+        if(fs.statSync(moviePath).isDirectory()) {
+            // Check if same folder has been stored already to database
+            if(existingMovies.filter((element) => element["path"] == moviePath).length > 0) {
+                // Movie already exists. Check new folder
+                continue;
+            }
+
+            var movieObj = {}
+            movieObj["name"] = movieName;
+            movieObj["path"] = moviePath;
+        
+            subs = [];
+
+            // Read all files in subfolder.
+            fs.readdirSync(moviePath).forEach(file => {
+                // If contains a dir and its name is Subs, add existing files in Subs with extension .srt to available movie subs.
+                if(fs.statSync(moviePath + "\\" + file).isDirectory()) {
+                    if(file == "Subs") {
+                        fs.readdirSync(moviePath + "\\Subs").forEach(subFile => {
+                            if(subFile.endsWith(".srt")) { 
+                                subObj = {}
+                                subObj["filename"] = subFile;
+                                subObj["path"] = moviePath + "\\Subs\\" + subFile;
+                                subs.push(subObj)
+                            }   
+                        });
+                    }
+                }
+                else {
+                    // Check files. If their extension is a supported movie extension, this is the movie file.
+                    if(file.endsWith(".avi") || file.endsWith(".mp4") || file.endsWith(".mkv")) {
+                        movieObj["file"] = moviePath + "\\" + file;     
+                    }
+                    // If files have .srt extension, they are subs. Add them to available movie subs.
+                    else if(file.endsWith(".srt")) {
+                        subObj = {}
+                        subObj["filename"] = file;
+                        subObj["path"] = moviePath + "\\" + file;
+                        subs.push(subObj)
+                    }
+                }
+            });
+
+            movieObj["subs"] = subs;
+            m.push(new movieModel(movieObj));
+        }
+    }
+
+    return m;
+}
+*/
+
+/****************************************************************************************************************************
+ ****************************************************************************************************************************
+ ****************************************************************************************************************************/
 
 exports.createSubBlob = async function (sub) {
     const subFile = fe(sub["path"]);

@@ -17,21 +17,21 @@ exports.listSeries = async function(req, res) {
         });
 };
 
-// Run again initialization process for movies
+// Run again initialization process for series
 /*
-exports.refreshMovies = async function(req, res) {
-    // Delete existing collection of movies
+exports.refreshSeries = async function(req, res) {
+    // Delete existing collection of series
     dbController.deleteAllFromCollection(seriesModel)
         .then((deleteResult) => {
             // If collection deleted successfully
-            console.log(deleteResult["deletedCOunt"] + " movies deleted from database.");
-            helpers.initializeMoviesOnly(dbController)
+            console.log(deleteResult["deletedCount"] + " series deleted from database.");
+            helpers.initializeSeriesOnly(dbController)
                 .then((initResult) => {
-                    // Return list of renewed movies
+                    // Return list of renewed series
                     dbController.getAllCollection(seriesModel)
-                        .then((movies) => {
+                        .then((series) => {
                             res.setHeader("Content-Type", "application/json");
-                            res.json( movies );
+                            res.json( series );
                         })
                         .catch((err) => {
                             res.setHeader("Content-Type", "application/json");

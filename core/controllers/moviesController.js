@@ -23,7 +23,7 @@ exports.refreshMovies = async function(req, res) {
     dbController.deleteAllFromCollection(movieModel)
         .then((deleteResult) => {
             // If collection deleted successfully
-            console.log(deleteResult["deletedCOunt"] + " movies deleted from database.");
+            console.log(deleteResult["deletedCount"] + " movies deleted from database.");
             helpers.initializeMoviesOnly(dbController)
                 .then((initResult) => {
                     // Return list of renewed movies
