@@ -18,8 +18,10 @@ const seriesModel = require("../models/seriesModel");
 exports.initializeContent = async function (mongoDbController) {
     var dirs = await mongoDbController.getAllCollection(dirsModel);
     var movies = await mongoDbController.getAllCollection(movieModel);
+    var series = await mongoDbController.getAllCollection(seriesModel);
 
     initializeMovies(dirs[0]["movies"], movies);
+    initializeSeries(dirs[0]["series"], series);
 }
 
 exports.initializeMoviesOnly = async function (mongoDbController) {
@@ -170,75 +172,60 @@ async function addMoviesFromLocation(loc, existingMovies) {
     return m;
 }
 
-/****************************************************************************************************************************
- ****************************************************************************************************************************
- ****************************************************************************************************************************/
-
 // Add all folders found in the given location.
-/*
-async function addMoviesFromLocation(loc, existingMovies) {
-    var m = []
-    var moviesInLoc = fs.readdirSync(loc, { withFileTypes: true })
-    for(var i=0;i<moviesInLoc.length;i++) {
-        const movieName = moviesInLoc[i]["name"];
-        const moviePath = loc + movieName
-
+async function addSeriesFromLocation(loc, existingSeries) {
+    var s = []
+    var seriesInLoc = fs.readdirSync(loc, { withFileTypes: true })
+    for(var i=0;i<seriesInLoc.length;i++) {
+        const seriesName = seriesInLoc[i]["name"];
+        const seriesPath = loc + seriesName
+        
         // Check if subfolder exists.
-        if(fs.statSync(moviePath).isDirectory()) {
+        if(fs.statSync(seriesPath).isDirectory()) {
             // Check if same folder has been stored already to database
-            if(existingMovies.filter((element) => element["path"] == moviePath).length > 0) {
-                // Movie already exists. Check new folder
+            if(existingSeries.filter((element) => element["path"] == seriesPath).length > 0) {
+                // Series already exists. Check new folder
                 continue;
             }
 
-            var movieObj = {}
-            movieObj["name"] = movieName;
-            movieObj["path"] = moviePath;
-        
-            subs = [];
+            // Each Series must have specific structure. Inside of the root folder there must be 
+            // one folder for each season, even if there is only one season or it is mini-series.
+            // Season names must be in format Season 01, Season 02, etc.
 
-            // Read all files in subfolder.
-            fs.readdirSync(moviePath).forEach(file => {
-                // If contains a dir and its name is Subs, add existing files in Subs with extension .srt to available movie subs.
-                if(fs.statSync(moviePath + "\\" + file).isDirectory()) {
-                    if(file == "Subs") {
-                        fs.readdirSync(moviePath + "\\Subs").forEach(subFile => {
-                            if(subFile.endsWith(".srt")) { 
-                                subObj = {}
-                                subObj["filename"] = subFile;
-                                subObj["path"] = moviePath + "\\Subs\\" + subFile;
-                                subs.push(subObj)
-                            }   
+            seasons_counter = 0
+            episodes_counter = 0
+
+            // Count the number of seasons as follow: Every folder in root dir 
+            // which its name starts with "Season", is considered a different season.
+            // Count the number of episodes as follow: For every season folder count the number
+            // of files, where extension is one of (.mp4, .mkv, .avi).
+            fs.readdirSync(seriesPath).forEach(folder => {
+                if(fs.statSync(seriesPath + "\\" + folder).isDirectory()) {
+                    if(folder.startsWith("Season")) {
+                        seasons_counter = seasons_counter + 1
+
+                        fs.readdirSync(seriesPath + "\\" + folder).forEach(f => {
+                            if(f.endsWith(".mp4") || f.endsWith(".mkv") || f.endsWith(".avi")) {
+                                episodes_counter = episodes_counter + 1
+                            }
                         });
-                    }
-                }
-                else {
-                    // Check files. If their extension is a supported movie extension, this is the movie file.
-                    if(file.endsWith(".avi") || file.endsWith(".mp4") || file.endsWith(".mkv")) {
-                        movieObj["file"] = moviePath + "\\" + file;     
-                    }
-                    // If files have .srt extension, they are subs. Add them to available movie subs.
-                    else if(file.endsWith(".srt")) {
-                        subObj = {}
-                        subObj["filename"] = file;
-                        subObj["path"] = moviePath + "\\" + file;
-                        subs.push(subObj)
                     }
                 }
             });
 
-            movieObj["subs"] = subs;
-            m.push(new movieModel(movieObj));
+            var seriesObj = {}
+            seriesObj["name"] = seriesName;
+            seriesObj["path"] = seriesPath;
+            seriesObj["seasons"] = seasons_counter;
+            seriesObj["episodes"] = episodes_counter;
+
+            s.push(new seriesModel(seriesObj));
         }
     }
 
-    return m;
+    //console.log(s)
+    return s;
 }
-*/
-
-/****************************************************************************************************************************
- ****************************************************************************************************************************
- ****************************************************************************************************************************/
 
 exports.createSubBlob = async function (sub) {
     const subFile = fe(sub["path"]);

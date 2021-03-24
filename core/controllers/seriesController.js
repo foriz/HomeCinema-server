@@ -18,7 +18,6 @@ exports.listSeries = async function(req, res) {
 };
 
 // Run again initialization process for series
-/*
 exports.refreshSeries = async function(req, res) {
     // Delete existing collection of series
     dbController.deleteAllFromCollection(seriesModel)
@@ -48,17 +47,72 @@ exports.refreshSeries = async function(req, res) {
             res.json({ "error": err });
         });
 };
-*/
 
-// Get info about a specific movie (name, length, year, description, tags, poster) (param: movie_id)
-/*
-exports.getMovieInfo = async function(req, res) {
-    // Get movie id parameter
-    const movId = req.query.mov_id;
-    dbController.getRecord(seriesModel, movId)
-        .then((mInfo) => {
+// Get info about a specific series (name, no_seasons, no_episodes, year, description, tags, poster) (param: ser_id)
+exports.getSeriesInfo = async function(req, res) {
+    // Get series id parameter
+    const seriesId = req.query.ser_id;
+    dbController.getRecord(seriesModel, seriesId)
+        .then((sInfo) => {
             res.setHeader("Content-Type", "application/json");
-            res.json( mInfo );
+            res.json( sInfo );
+        })
+        .catch((err) => {
+            res.setHeader("Content-Type", "application/json");
+            res.json( err );
+        })
+};
+
+// Get info about seasons of a series. For each season return given name and path
+exports.getSeriesSeasons = async function(req, res) {
+    // Get series id parameter
+    const seriesId = req.query.ser_id;
+    dbController.getRecord(seriesModel, seriesId)
+        .then((sInfo) => {
+            seasonsInfo = {}
+
+            seriesPath = sInfo["path"];
+            fs.readdirSync(seriesPath).forEach(folder => {
+                if(fs.statSync(seriesPath + "\\" + folder).isDirectory()) {
+                    if(folder.startsWith("Season")) {
+                        seasonsInfo[folder] = seriesPath + "\\" + folder;
+                    }
+                }
+            });
+
+            res.setHeader("Content-Type", "application/json");
+            res.json( seasonsInfo );
+        })
+        .catch((err) => {
+            res.setHeader("Content-Type", "application/json");
+            res.json( err );
+        })
+};
+
+/********************************************************************************************************* */
+/********************************************************************************************************* */
+/********************************************************************************************************* */
+
+// Get info about episoed of a season. For each episode return file name, length, path and subs (filename, path)
+/*
+exports.getSeasonEpisodes = async function(req, res) {
+    // Get series id parameter
+    const seriesId = req.query.ser_id;
+    dbController.getRecord(seriesModel, seriesId)
+        .then((sInfo) => {
+            seasonsInfo = {}
+
+            seriesPath = sInfo["path"];
+            fs.readdirSync(seriesPath).forEach(folder => {
+                if(fs.statSync(seriesPath + "\\" + folder).isDirectory()) {
+                    if(folder.startsWith("Season")) {
+                        seasonsInfo[folder] = seriesPath + "\\" + folder;
+                    }
+                }
+            });
+
+            res.setHeader("Content-Type", "application/json");
+            res.json( seasonsInfo );
         })
         .catch((err) => {
             res.setHeader("Content-Type", "application/json");
@@ -66,6 +120,10 @@ exports.getMovieInfo = async function(req, res) {
         })
 };
 */
+
+/********************************************************************************************************* */
+/********************************************************************************************************* */
+/********************************************************************************************************* */
 
 // Get info about available subs (param: movie_id)
 /*
