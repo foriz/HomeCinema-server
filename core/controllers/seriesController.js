@@ -1,4 +1,5 @@
 var fs = require("fs");
+var path = require("path")
 
 let seriesModel = require("../models/seriesModel")
 let dbController = require("../controllers/mongoDbController")
@@ -63,19 +64,26 @@ exports.getSeriesInfo = async function(req, res) {
         })
 };
 
-// Get info about seasons of a series. For each season return given name and path
+// Get info about seasons of a series. For each season return an id (counter), given name and path
 exports.getSeriesSeasons = async function(req, res) {
     // Get series id parameter
     const seriesId = req.query.ser_id;
     dbController.getRecord(seriesModel, seriesId)
         .then((sInfo) => {
-            seasonsInfo = {}
+            seasonsCounter = 1;
+            seasonsInfo = {};
 
             seriesPath = sInfo["path"];
             fs.readdirSync(seriesPath).forEach(folder => {
-                if(fs.statSync(seriesPath + "\\" + folder).isDirectory()) {
+                if(fs.statSync(seriesPath + "/" + folder).isDirectory()) {
                     if(folder.startsWith("Season")) {
-                        seasonsInfo[folder] = seriesPath + "\\" + folder;
+                        sObj = {};
+                        sObj["name"] = folder;
+                        sObj["path"] = seriesPath + "/" + folder;
+                        sObj["id"] = seasonsCounter;
+
+                        seasonsInfo[seasonsCounter] = sObj;
+                        seasonsCounter = seasonsCounter + 1
                     }
                 }
             });
@@ -88,93 +96,94 @@ exports.getSeriesSeasons = async function(req, res) {
             res.json( err );
         })
 };
-
-/********************************************************************************************************* */
-/********************************************************************************************************* */
-/********************************************************************************************************* */
 
 // Get info about episoed of a season. For each episode return file name, length, path and subs (filename, path)
-/*
 exports.getSeasonEpisodes = async function(req, res) {
     // Get series id parameter
-    const seriesId = req.query.ser_id;
-    dbController.getRecord(seriesModel, seriesId)
-        .then((sInfo) => {
-            seasonsInfo = {}
+    var seasonPath = req.query.season_path;
 
-            seriesPath = sInfo["path"];
-            fs.readdirSync(seriesPath).forEach(folder => {
-                if(fs.statSync(seriesPath + "\\" + folder).isDirectory()) {
-                    if(folder.startsWith("Season")) {
-                        seasonsInfo[folder] = seriesPath + "\\" + folder;
-                    }
-                }
-            });
+    episodes = {}
+    episodesCounter = 1
+    fs.readdirSync(seasonPath).forEach(episode => {
+        // Check if video file (accepted extensions: .mp4, .mkv, .avi)
+        if(path.extname(episode) == ".avi" || path.extname(episode) == ".mp4" || path.extname(episode) == ".mkv") {
+            subsFile = path.parse(episode).name + ".srt"
+            subs = []
 
-            res.setHeader("Content-Type", "application/json");
-            res.json( seasonsInfo );
-        })
-        .catch((err) => {
-            res.setHeader("Content-Type", "application/json");
-            res.json( err );
-        })
+            // Search for subs for this episode. Subs can be detected if they are in same location with
+            // video file having exact the same name and .srt extension. Or if they are in a Subs folder
+            // having exact the same name with video file and .srt extension.
+            if (fs.existsSync(seasonPath + "/" + subsFile)) {
+                subsObj = {}
+                subsObj["filename"] = subsFile;
+                subsObj["path"] = seasonPath + "/" + subsFile
+                
+                subs.push(subsObj);
+            }
+
+            if (fs.existsSync(seasonPath + "/Subs/" + subsFile)) {
+                subsObj = {}
+                subsObj["filename"] = subsFile;
+                subsObj["path"] = seasonPath + "/Subs/" + subsFile
+                
+                subs.push(subsObj);
+            }
+
+            eObj = {};
+            eObj["name"] = episode;
+            eObj["path"] = seasonPath + "/" + episode;
+            eObj["id"] = episodesCounter;
+            eObj["subs"] = subsObj;
+
+            episodes[episodesCounter] = eObj;
+            episodesCounter = episodesCounter + 1
+        }
+    });
+
+    res.setHeader("Content-Type", "application/json");
+    res.json( episodes );
 };
-*/
 
-/********************************************************************************************************* */
-/********************************************************************************************************* */
-/********************************************************************************************************* */
+// Get info about specific subtitles file (param: sub)
+exports.getSubtitle = async function(req, res) {
+    const subPath = req.query.path;
+    const subFilename = req.query.filename;
 
-// Get info about available subs (param: movie_id)
-/*
-exports.getMovieSubs = async function(req, res) {
-    const movId = req.query.mov_id;
-    
-    // Get movie info
-    dbController.getRecord(seriesModel, movId)
-        .then((mInfo) => {
-            promises = [];
-            mInfo["subs"].forEach((sub) => {
-                promises.push(helpers.createSubBlob(sub))
-            });     
+    sub = {}
+    sub["path"] = subPath;
+    sub["filename"] = subFilename;
 
-            Promise.all(promises)
-                .then((blobs) => {
-                    res.setHeader("Content-Type", "application/json");
-                    res.json( blobs );
-                })
-                .catch((err) => {
-                    res.setHeader("Content-Type", "application/json");
-                    res.json( err );
-                });
-        })
-        .catch((err) => {
+    helpers.createSubBlob(sub)
+        .then((subObj) => {
             res.setHeader("Content-Type", "application/json");
-            res.json( err );
-        })
-};
-*/
-
-// Stream movie (param: movie_id)
-/*
-exports.streamMovie = async function(req, res) {
-    const movId = req.query["mov_id"];
-    //const startByte = (req.headers["range"].replace("bytes=", "")).split("-")[0]
-
-    dbController.getRecord(seriesModel, movId)
-        .then((mInfo) => {
-            //res.setHeader("Content-Type", "video/mp4");
-            //fs.createReadStream(mInfo["file"], { start : startByte }).pipe(res);
-
-            var buffer = fs.readFileSync(mInfo["file"]);
-
-            res.setHeader("Content-Type", "video/mp4");
-            res.write(buffer);
-            res.end();
+            res.json( subObj );
         })
         .catch((err) => {
             res.setHeader("Content-Type", "application/json");
             res.json( err );
         });
 };
-*/
+
+// Stream episode. As param given the path of the episode video file (param: path)
+exports.streamEpisode = async function(req, res) {
+    const epFile = req.query["path"];
+
+    contentType = "video/mp4"
+    if(path.extname(epFile) == ".mkv") {
+        contentType = "video/mp4"
+    }
+    else if(path.extname(epFile) == ".avi"){
+        contentType = "video/x-msvideo"
+    }
+
+    //const startByte = (req.headers["range"].replace("bytes=", "")).split("-")[0]
+
+    //res.setHeader("Content-Type", "video/mp4");
+    //fs.createReadStream(mInfo["file"], { start : startByte }).pipe(res);
+
+    var buffer = fs.readFileSync(epFile);
+
+    res.setHeader("Content-Type", contentType);
+    res.write(buffer);
+    res.end();
+};

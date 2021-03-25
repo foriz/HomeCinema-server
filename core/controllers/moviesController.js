@@ -98,12 +98,20 @@ exports.streamMovie = async function(req, res) {
 
     dbController.getRecord(movieModel, movId)
         .then((mInfo) => {
+            contentType = "video/mp4"
+            if(path.extname(epFile) == ".mkv") {
+                contentType = "video/mp4"
+            }
+            else if(path.extname(epFile) == ".avi"){
+                contentType = "video/x-msvideo"
+            }
+
             //res.setHeader("Content-Type", "video/mp4");
             //fs.createReadStream(mInfo["file"], { start : startByte }).pipe(res);
 
             var buffer = fs.readFileSync(mInfo["file"]);
 
-            res.setHeader("Content-Type", "video/mp4");
+            res.setHeader("Content-Type", contentType);
             res.write(buffer);
             res.end();
         })

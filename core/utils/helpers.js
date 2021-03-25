@@ -137,13 +137,13 @@ async function addMoviesFromLocation(loc, existingMovies) {
             // Read all files in subfolder.
             fs.readdirSync(moviePath).forEach(file => {
                 // If contains a dir and its name is Subs, add existing files in Subs with extension .srt to available movie subs.
-                if(fs.statSync(moviePath + "\\" + file).isDirectory()) {
+                if(fs.statSync(moviePath + "/" + file).isDirectory()) {
                     if(file == "Subs") {
-                        fs.readdirSync(moviePath + "\\Subs").forEach(subFile => {
+                        fs.readdirSync(moviePath + "/Subs").forEach(subFile => {
                             if(subFile.endsWith(".srt")) { 
                                 subObj = {}
                                 subObj["filename"] = subFile;
-                                subObj["path"] = moviePath + "\\Subs\\" + subFile;
+                                subObj["path"] = moviePath + "/Subs/" + subFile;
                                 subs.push(subObj)
                             }   
                         });
@@ -152,13 +152,13 @@ async function addMoviesFromLocation(loc, existingMovies) {
                 else {
                     // Check files. If their extension is a supported movie extension, this is the movie file.
                     if(file.endsWith(".avi") || file.endsWith(".mp4") || file.endsWith(".mkv")) {
-                        movieObj["file"] = moviePath + "\\" + file;     
+                        movieObj["file"] = moviePath + "/" + file;     
                     }
                     // If files have .srt extension, they are subs. Add them to available movie subs.
                     else if(file.endsWith(".srt")) {
                         subObj = {}
                         subObj["filename"] = file;
-                        subObj["path"] = moviePath + "\\" + file;
+                        subObj["path"] = moviePath + "/" + file;
                         subs.push(subObj)
                     }
                 }
@@ -192,21 +192,21 @@ async function addSeriesFromLocation(loc, existingSeries) {
             // one folder for each season, even if there is only one season or it is mini-series.
             // Season names must be in format Season 01, Season 02, etc.
 
-            seasons_counter = 0
-            episodes_counter = 0
+            seasonsCounter = 0
+            episodesCounter = 0
 
             // Count the number of seasons as follow: Every folder in root dir 
             // which its name starts with "Season", is considered a different season.
             // Count the number of episodes as follow: For every season folder count the number
             // of files, where extension is one of (.mp4, .mkv, .avi).
             fs.readdirSync(seriesPath).forEach(folder => {
-                if(fs.statSync(seriesPath + "\\" + folder).isDirectory()) {
+                if(fs.statSync(seriesPath + "/" + folder).isDirectory()) {
                     if(folder.startsWith("Season")) {
-                        seasons_counter = seasons_counter + 1
+                        seasonsCounter = seasonsCounter + 1
 
-                        fs.readdirSync(seriesPath + "\\" + folder).forEach(f => {
+                        fs.readdirSync(seriesPath + "/" + folder).forEach(f => {
                             if(f.endsWith(".mp4") || f.endsWith(".mkv") || f.endsWith(".avi")) {
-                                episodes_counter = episodes_counter + 1
+                                episodesCounter = episodesCounter + 1
                             }
                         });
                     }
@@ -216,8 +216,8 @@ async function addSeriesFromLocation(loc, existingSeries) {
             var seriesObj = {}
             seriesObj["name"] = seriesName;
             seriesObj["path"] = seriesPath;
-            seriesObj["seasons"] = seasons_counter;
-            seriesObj["episodes"] = episodes_counter;
+            seriesObj["seasons"] = seasonsCounter;
+            seriesObj["episodes"] = episodesCounter;
 
             s.push(new seriesModel(seriesObj));
         }

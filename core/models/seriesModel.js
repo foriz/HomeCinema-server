@@ -20,6 +20,9 @@ let seriesSchema = new mongoose.Schema({
     },
     tags: {
         type: String
+    },
+    poster: {
+        type: String
     }
 });
 
