@@ -75,6 +75,19 @@ module.exports = {
         });
     },
 
+    updateSingleRecord: async function(mongoModel, recId, record) {
+        return new Promise((resolve, reject) => {
+            mongoModel
+                .findOneAndUpdate( 
+                    { _id: recId }, 
+                    record,
+                    { new: true, runValidators: true }
+                )
+                .then(doc => { resolve({ "success": "Records updated!" }); })        
+                .catch(err => { reject({ "error": err }); })
+        });
+    },
+
     getRecord: async function(mongoModel, recId) {
         return new Promise((resolve, reject) => {
             mongoModel

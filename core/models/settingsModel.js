@@ -1,8 +1,9 @@
 let mongoose = require("mongoose");
 
 let settingsSchema = new mongoose.Schema({
-    server: {
-        type: String
+    port: {
+        type: Number,
+        required: [true, "Please enter port, where server is listening."]
     },
     protocol: {
         type: String,

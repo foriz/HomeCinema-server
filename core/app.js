@@ -16,11 +16,13 @@ const helpers = require("./utils/helpers.js");
 var dirsRouter = require("./api/dirsRouter");
 var moviesRouter = require("./api/moviesRouter");
 var seriesRouter = require("./api/seriesRouter");
+var settingsRouter = require("./api/settingsRouter");
 
 // Use routers
 app.use("/dirs", dirsRouter);
 app.use("/movies", moviesRouter);
 app.use("/series", seriesRouter);
+app.use("/settings", settingsRouter);
 
 // Initialize/reload data in mongo database
 const dbController = require("./controllers/mongoDbController.js");
