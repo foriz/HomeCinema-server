@@ -8,22 +8,15 @@ let configuration = require("../config/config.json");
 
 // Get a list with all available movies in the Database
 exports.getSettings = async function(req, res) {
-    /*
-    dbController.getAllCollection(seriesModel)
-        .then((series) => {
+    dbController.getAllCollection(settingsModel)
+        .then((settings) => {
             res.setHeader("Content-Type", "application/json");
-            res.json( series );
+            res.json( settings[0] );
         })
         .catch((err) => {
             res.setHeader("Content-Type", "application/json");
             res.json({ "error": err });
         });
-    */
-
-    ok = {}
-    ok["ok"] = "ok";
-    res.setHeader("Content-Type", "application/json");
-    res.json({ "error": ok });
 };
 
 // Get a list with all available movies in the Database
