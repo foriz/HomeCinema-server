@@ -26,4 +26,4 @@ let seriesSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model("Series", seriesSchema)
+module.exports = mongoose.model("Series", seriesSchema, "series")

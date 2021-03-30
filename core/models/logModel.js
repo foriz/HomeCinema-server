@@ -15,7 +15,7 @@ let logSchema = new mongoose.Schema({
     },
     msg: {
         type: String
-    },
+    }
 });
 
-module.exports = mongoose.model("Log", logSchema);
+module.exports = mongoose.model("Log", logSchema, "logs");

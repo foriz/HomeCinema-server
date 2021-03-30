@@ -1,4 +1,6 @@
 const express = require("express");
+const session = require('express-session')
+
 var app = express();
 
 // Configuration files
@@ -17,16 +19,32 @@ var dirsRouter = require("./api/dirsRouter");
 var moviesRouter = require("./api/moviesRouter");
 var seriesRouter = require("./api/seriesRouter");
 var settingsRouter = require("./api/settingsRouter");
+var monitorRouter = require("./api/monitorRouter");
+
+var mongodbUrl = "mongodb://"+config["mongodb"]["username"]+":"+config["mongodb"]["password"]+"@"+config["mongodb"]["host"]+":"+config["mongodb"]["port"]+"/"+config["mongodb"]["db"]+"?authSource=admin"
+if ((config["mongodb"]["username"].trim() == "") || (config["mongodb"]["username"].trim() == undefined)) {
+    mongodbUrl = "mongodb://"+config["mongodb"]["host"]+":"+config["mongodb"]["port"]+"/"+config["mongodb"]["db"]
+}
+
+// Enable express session modue
+app.use(
+    session({
+        secret: 'keyboard cat',
+        resave: false,
+        saveUninitialized: true
+    })
+)
 
 // Use routers
 app.use("/dirs", dirsRouter);
 app.use("/movies", moviesRouter);
 app.use("/series", seriesRouter);
 app.use("/settings", settingsRouter);
+app.use("/monitor", monitorRouter);
 
 // Initialize/reload data in mongo database
 const dbController = require("./controllers/mongoDbController.js");
-helpers.initializeContent(dbController)
+helpers.initializeContent(dbController, server_port)
     .then((initResult) => {
         // Start server
         app.listen(server_port, () => {

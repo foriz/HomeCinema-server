@@ -6,6 +6,8 @@ const dbController = require("../controllers/mongoDbController");
 const dirsModel = require("../models/dirsModel");
 const movieModel = require("../models/movieModel");
 const seriesModel = require("../models/seriesModel");
+const settingsModel = require("../models/settingsModel");
+const { resolve } = require("path");
 
 // Initialize data for all movies & series in saved locations.
 // For each folder name in these paths save the following attributes:
@@ -15,13 +17,45 @@ const seriesModel = require("../models/seriesModel");
 // --description (from some open movie db api)
 // --tags (from some open movie db api)
 // --poster (from some open movie db api)
-exports.initializeContent = async function (mongoDbController) {
+exports.initializeContent = async function (mongoDbController, serverPort) {
+    initializeSettings(serverPort);
     var dirs = await mongoDbController.getAllCollection(dirsModel);
-    var movies = await mongoDbController.getAllCollection(movieModel);
-    var series = await mongoDbController.getAllCollection(seriesModel);
 
-    initializeMovies(dirs[0]["movies"], movies);
-    initializeSeries(dirs[0]["series"], series);
+    if(dirs.length > 0) {
+        var movies = await mongoDbController.getAllCollection(movieModel);
+        var series = await mongoDbController.getAllCollection(seriesModel);
+
+        if("movies" in dirs[0]) {
+            initializeMovies(dirs[0]["movies"], movies);
+        }
+        if("series" in dirs[0]) {
+            initializeSeries(dirs[0]["series"], series);
+        }
+    }
+}
+
+async function initializeSettings(serverPort) {
+    dbController.getAllCollection(settingsModel)
+        .then((settings) => {
+            if(settings.length == 0) {
+                settingsDefaultObj = new settingsModel;
+                settingsDefaultObj.port = parseInt(serverPort);
+                settingsDefaultObj.protocol = "HTTP";
+                
+                return new Promise((resolve, reject) => {
+                    dbController.insertRecord(settingsDefaultObj)
+                        .then((insertResult) => {
+                            resolve(insertResult);
+                        })
+                        .catch((insertResultError) => {
+                            reject(insertResultError);
+                        });
+                });
+            }
+        })
+        .catch((err) => {
+            console.log(err)
+        });
 }
 
 exports.initializeMoviesOnly = async function (mongoDbController) {
@@ -263,4 +297,8 @@ function toArrayBuffer(buf) {
         view[i] = buf[i];
     }
     return ab;
+}
+
+function getMonitorStats() {
+    // TODO: Run two packages functions every 10 seconds
 }

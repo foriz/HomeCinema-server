@@ -11,4 +11,4 @@ let dirsSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model("Dirs", dirsSchema)
+module.exports = mongoose.model("Dirs", dirsSchema, "dirs")

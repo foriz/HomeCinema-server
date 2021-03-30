@@ -8,7 +8,7 @@ let settingsSchema = new mongoose.Schema({
     protocol: {
         type: String,
         required: [true, "Please enter default protocol for streaming."]
-    },
+    }
 });
 
-module.exports = mongoose.model("Settings", settingsSchema);
+module.exports = mongoose.model("Settings", settingsSchema, "settings");
