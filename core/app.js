@@ -42,6 +42,9 @@ app.use("/series", seriesRouter);
 app.use("/settings", settingsRouter);
 app.use("/monitor", monitorRouter);
 
+// Start monitoring
+helpers.startMonitoring(10000);
+
 // Initialize/reload data in mongo database
 const dbController = require("./controllers/mongoDbController.js");
 helpers.initializeContent(dbController, server_port)

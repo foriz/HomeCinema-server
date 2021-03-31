@@ -1,5 +1,6 @@
 const fs = require("fs");
-const fe = require('file-encoding');
+const fe = require("file-encoding");
+const os = require("os-utils");
 
 const dbController = require("../controllers/mongoDbController");
 
@@ -8,6 +9,8 @@ const movieModel = require("../models/movieModel");
 const seriesModel = require("../models/seriesModel");
 const settingsModel = require("../models/settingsModel");
 const { resolve } = require("path");
+const monitorModel = require("../models/monitorModel");
+const { promises } = require("dns");
 
 // Initialize data for all movies & series in saved locations.
 // For each folder name in these paths save the following attributes:
@@ -299,6 +302,25 @@ function toArrayBuffer(buf) {
     return ab;
 }
 
+exports.startMonitoring = function (delay) {
+    setInterval(getMonitorStats, delay)
+}
+
 function getMonitorStats() {
-    // TODO: Run two packages functions every 10 seconds
+    stats = new monitorModel;
+    stats.timestamp = +new Date;
+    stats.os = os.platform();
+    stats.sys_uptime = os.sysUptime();
+    stats.process_uptime = os.processUptime();
+    stats.cpu_count = os.cpuCount();
+    stats.mem_usage = (1.0 - os.freememPercentage()) * 100
+    stats.avg_load_1_min = os.loadavg(1);
+    stats.avg_load_5_min = os.loadavg(5);
+    stats.avg_load_15_min = os.loadavg(15);
+    // After async command is executed, store to db. 
+    // Other commands are synchronous and have been executed before this call.
+    os.cpuUsage(function(v){
+        stats.cpu_usage = v * 100
+        dbController.insertRecord(stats);
+    });
 }

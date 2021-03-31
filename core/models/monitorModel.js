@@ -28,18 +28,6 @@ let monitorSchema = new mongoose.Schema({
     mem_usage: {
         type: Number,
         required: [true, "Usage of RAM (%)."]
-    }, 
-    store_usage: {
-        type: Number,
-        required: [true, "Percentage of used store."]
-    },
-    net_down_speed: {
-        type: Number,
-        required: [true, "Network download speed."]
-    },
-    net_up_speed: {
-        type: Number,
-        required: [true, "Network upload speed."]
     },
     avg_load_1_min: {
         type: Number,
