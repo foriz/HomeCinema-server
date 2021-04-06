@@ -11,6 +11,7 @@ const settingsModel = require("../models/settingsModel");
 const { resolve } = require("path");
 const monitorModel = require("../models/monitorModel");
 const { promises } = require("dns");
+const { Logger } = require("mongodb");
 
 // Initialize data for all movies & series in saved locations.
 // For each folder name in these paths save the following attributes:

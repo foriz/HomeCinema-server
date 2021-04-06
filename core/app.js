@@ -1,9 +1,29 @@
 const express = require("express");
 const session = require('express-session')
 
+const dbController = require("./controllers/mongoDbController.js");
+
+let logModel = require("./models/logModel")
+
+var logger = require('npmlog')
+
+logger.on('log', function(l) {
+    let logJson = new logModel({
+        timestamp: +new Date,
+        level: l["level"],
+        prefix: "app.js",
+        route: l["prefix"],
+        msg: l["message"]
+    });
+    dbController.insertRecord(logJson)
+        .then((res) => { /* Do nothing, log inserted */ })
+        .catch((err) => { /* Do nothing, log cannot be inserted */ })
+});
+
 var app = express();
 
 // Configuration files
+logger.info("/", "Importing configuration");
 const config = require("./config/config.json");
 const server_ip = config["server"]["host"];
 const server_port = config["server"]["port"];
@@ -36,6 +56,7 @@ app.use(
 )
 
 // Use routers
+logger.info("/", "Registering routers");
 app.use("/dirs", dirsRouter);
 app.use("/movies", moviesRouter);
 app.use("/series", seriesRouter);
@@ -43,19 +64,20 @@ app.use("/settings", settingsRouter);
 app.use("/monitor", monitorRouter);
 
 // Start monitoring
+logger.info("/", "Starting monitoring");
 helpers.startMonitoring(10000);
 
 // Initialize/reload data in mongo database
-const dbController = require("./controllers/mongoDbController.js");
 helpers.initializeContent(dbController, server_port)
     .then((initResult) => {
         // Start server
         app.listen(server_port, () => {
-            console.log("Started server ["+server_url+"]");
+            logger.info("/", "Started server ["+server_url+"]");
         });
 
         // API request for discovery connection & heartbeat
         app.get("/ping", (req, res, next) => {
+            logger.info("/ping", req.socket.remoteAddress);
             res.json({
               "response": "pong",
               "server_url": server_url,
@@ -64,5 +86,5 @@ helpers.initializeContent(dbController, server_port)
         });
     })
     .catch((initError) => {
-        console.error(initError);
+        logger.error("/", "An error occured during initialization: "+JSON.stringify(initError));
     });
