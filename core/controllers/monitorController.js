@@ -1,45 +1,59 @@
+const helpers = require("../utils/helpers.js");
+
 let monitorModel = require("../models/monitorModel");
+let logModel = require("../models/logModel");
 let dbController = require("../controllers/mongoDbController");
+
+var logger = require('npmlog')
+logger.on("log", function(l) {
+    helpers.onLogCallback(l, "/monitor");
+});
+
 
 // Get a json array with logs(all or filtered by timestamp)
 exports.getLogs = async function(req, res) {
-    /*
-    dbController.getAllCollection(dirsModel)
+    logger.info("/logs/level_logs="+req.query.level_logs+"&n_logs="+req.query.n_logs, req.socket.remoteAddress);
+    
+    var logLevelParam = req.query.level_logs;
+    var nLogsParam = parseInt(req.query.n_logs);
+    
+    if(logLevelParam == undefined) {
+        logLevelParam = "error";
+    }
+    if(isNaN(nLogsParam)) {
+        nLogsParam = 10;
+    }
+
+    var c = {};
+    c["field"] = "level";
+    c["op"] = "eq";
+    c["value"] = logLevelParam;
+    
+    var criteria = []
+    criteria.push(c);
+
+    dbController.filterLastNRecords(logModel, criteria, nLogsParam, "timestamp", -1)
         .then((dirs) => {
             res.setHeader("Content-Type", "application/json");
             res.json( dirs );
         })
         .catch((err) => {
+            logger.error("/logs/level_logs="+req.query.level_logs+"&n_logs="+req.query.n_logs, err);
             res.setHeader("Content-Type", "application/json");
             res.json({ "error": err });
         });
-    */
-};
-
-// Get a json contains all notifications
-exports.getNotifications = async function(req, res) {
-    /*
-    dbController.getSubCollection(dirsModel, "movies")
-        .then((movies) => {
-            res.setHeader("Content-Type", "application/json");
-            res.json( movies ); 
-        })
-        .catch((err) => {
-            res.setHeader("Content-Type", "application/json");
-            res.json({ "error": err });
-        });
-    */
 };
 
 // Get a json contains all connections
 exports.getResources = async function(req, res) {
-    // TODO: Get monitor stats from Mongo (30 mins by default)
-    // TODO: Implement time period params
     const returnAllParam = req.query.return_all;
     let startTimestampParam = parseInt(req.query.start_timestamp);
     let endTimestampParam = parseInt(req.query.end_timestamp);
     const intervalParam = Number(req.query.time_interval);
     const nLogsParam = parseInt(req.query.n_logs);
+
+    logger.info("/resources/return_all="+returnAllParam+"&start_timestamp="+startTimestampParam 
+        +"&end_timestamp="+endTimestampParam+"&time_interval="+intervalParam+"&n_logs="+nLogsParam, req.socket.remoteAddress);
 
     if((returnAllParam == 'true') || (returnAllParam == 'True')) {
         // Return all saved monitoring stats.
@@ -49,6 +63,8 @@ exports.getResources = async function(req, res) {
                 res.json( stats );
             })
             .catch((err) => {
+                logger.error("/resources/return_all="+returnAllParam+"&start_timestamp="+startTimestampParam 
+                    +"&end_timestamp="+endTimestampParam+"&time_interval="+intervalParam+"&n_logs="+nLogsParam, err);
                 res.setHeader("Content-Type", "application/json");
                 res.json({ "error": err });
             });
@@ -90,6 +106,8 @@ exports.getResources = async function(req, res) {
                 res.json( stats );
             })
             .catch((err) => {
+                logger.error("/resources/return_all="+returnAllParam+"&start_timestamp="+startTimestampParam 
+                    +"&end_timestamp="+endTimestampParam+"&time_interval="+intervalParam+"&n_logs="+nLogsParam, err);
                 res.setHeader("Content-Type", "application/json");
                 res.json({ "error": err });
             });
@@ -102,6 +120,8 @@ exports.getResources = async function(req, res) {
                 res.json( stats );
             })
             .catch((err) => {
+                logger.error("/resources/return_all="+returnAllParam+"&start_timestamp="+startTimestampParam 
+                    +"&end_timestamp="+endTimestampParam+"&time_interval="+intervalParam+"&n_logs="+nLogsParam, err);
                 res.setHeader("Content-Type", "application/json");
                 res.json({ "error": err });
             });
@@ -131,6 +151,8 @@ exports.getResources = async function(req, res) {
                 res.json( stats );
             })
             .catch((err) => {
+                logger.error("/resources/return_all="+returnAllParam+"&start_timestamp="+startTimestampParam 
+                    +"&end_timestamp="+endTimestampParam+"&time_interval="+intervalParam+"&n_logs="+nLogsParam, err);
                 res.setHeader("Content-Type", "application/json");
                 res.json({ "error": err });
             });
@@ -139,6 +161,7 @@ exports.getResources = async function(req, res) {
 
 // Get a json contains all connections
 exports.getConnections = async function(req, res) {
+    logger.info("/connections", req.socket.remoteAddress);
     var sessions = []
     for (var sess in req.sessionStore.sessions) {
         var sObj = {}

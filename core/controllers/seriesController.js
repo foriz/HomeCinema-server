@@ -5,14 +5,21 @@ let seriesModel = require("../models/seriesModel")
 let dbController = require("../controllers/mongoDbController")
 let helpers = require("../utils/helpers")
 
+var logger = require('npmlog')
+logger.on("log", function(l) {
+    helpers.onLogCallback(l, "/series");
+});
+
 // Get a list with all available movies in the Database
 exports.listSeries = async function(req, res) {
+    logger.info("/list", req.socket.remoteAddress);
     dbController.getAllCollection(seriesModel)
         .then((series) => {
             res.setHeader("Content-Type", "application/json");
             res.json( series );
         })
         .catch((err) => {
+            logger.error("/list", err);
             res.setHeader("Content-Type", "application/json");
             res.json({ "error": err });
         });
@@ -20,11 +27,12 @@ exports.listSeries = async function(req, res) {
 
 // Run again initialization process for series
 exports.refreshSeries = async function(req, res) {
+    logger.info("/refresh", req.socket.remoteAddress);
     // Delete existing collection of series
     dbController.deleteAllFromCollection(seriesModel)
         .then((deleteResult) => {
             // If collection deleted successfully
-            console.log(deleteResult["deletedCount"] + " series deleted from database.");
+            logger.info("/refresh", deleteResult["deletedCount"] + " series deleted from database.");
             helpers.initializeSeriesOnly(dbController)
                 .then((initResult) => {
                     // Return list of renewed series
@@ -34,16 +42,19 @@ exports.refreshSeries = async function(req, res) {
                             res.json( series );
                         })
                         .catch((err) => {
+                            logger.error("/refresh", err);
                             res.setHeader("Content-Type", "application/json");
                             res.json({ "error": err });
                         });
                 })
                 .catch((initError) => {
+                    logger.error("/refresh", initError);
                     res.setHeader("Content-Type", "application/json");
                     res.json( initError );
                 });
         })
         .catch((err) => {
+            logger.error("/refresh", err);
             res.setHeader("Content-Type", "application/json");
             res.json({ "error": err });
         });
@@ -51,6 +62,7 @@ exports.refreshSeries = async function(req, res) {
 
 // Get info about a specific series (name, no_seasons, no_episodes, year, description, tags, poster) (param: ser_id)
 exports.getSeriesInfo = async function(req, res) {
+    logger.info("/info/"+req.query.ser_id, req.socket.remoteAddress);
     // Get series id parameter
     const seriesId = req.query.ser_id;
     dbController.getRecord(seriesModel, seriesId)
@@ -59,6 +71,7 @@ exports.getSeriesInfo = async function(req, res) {
             res.json( sInfo );
         })
         .catch((err) => {
+            logger.error("/info/"+req.query.ser_id, err);
             res.setHeader("Content-Type", "application/json");
             res.json( err );
         })
@@ -66,6 +79,8 @@ exports.getSeriesInfo = async function(req, res) {
 
 // Get info about seasons of a series. For each season return an id (counter), given name and path
 exports.getSeriesSeasons = async function(req, res) {
+    logger.info("/seasons/"+req.query.ser_id, req.socket.remoteAddress);
+
     // Get series id parameter
     const seriesId = req.query.ser_id;
     dbController.getRecord(seriesModel, seriesId)
@@ -92,6 +107,8 @@ exports.getSeriesSeasons = async function(req, res) {
             res.json( seasonsInfo );
         })
         .catch((err) => {
+            logger.error("/seasons/"+req.query.ser_id, err);
+
             res.setHeader("Content-Type", "application/json");
             res.json( err );
         })
@@ -99,6 +116,8 @@ exports.getSeriesSeasons = async function(req, res) {
 
 // Get info about episoed of a season. For each episode return file name, length, path and subs (filename, path)
 exports.getSeasonEpisodes = async function(req, res) {
+    logger.info("/episodes/"+req.query.season_path, req.socket.remoteAddress);
+
     // Get series id parameter
     var seasonPath = req.query.season_path;
 
@@ -146,6 +165,8 @@ exports.getSeasonEpisodes = async function(req, res) {
 
 // Get info about specific subtitles file (param: sub)
 exports.getSubtitle = async function(req, res) {
+    logger.info("/sub/path="+req.query.path+"&filename="+req.query.filename, req.socket.remoteAddress);
+
     const subPath = req.query.path;
     const subFilename = req.query.filename;
 
@@ -159,6 +180,7 @@ exports.getSubtitle = async function(req, res) {
             res.json( subObj );
         })
         .catch((err) => {
+            logger.error("/sub/path="+req.query.path+"&filename="+req.query.filename, err);
             res.setHeader("Content-Type", "application/json");
             res.json( err );
         });
@@ -166,6 +188,8 @@ exports.getSubtitle = async function(req, res) {
 
 // Stream episode. As param given the path of the episode video file (param: path)
 exports.streamEpisode = async function(req, res) {
+    logger.info("/stream/"+req.query["path"], req.socket.remoteAddress);
+
     const epFile = req.query["path"];
 
     contentType = "video/mp4"

@@ -1,6 +1,7 @@
 const fs = require("fs");
 const fe = require("file-encoding");
 const os = require("os-utils");
+var logger = require("npmlog");
 
 const dbController = require("../controllers/mongoDbController");
 
@@ -8,10 +9,28 @@ const dirsModel = require("../models/dirsModel");
 const movieModel = require("../models/movieModel");
 const seriesModel = require("../models/seriesModel");
 const settingsModel = require("../models/settingsModel");
-const { resolve } = require("path");
 const monitorModel = require("../models/monitorModel");
+let logModel = require("../models/logModel")
+const { resolve } = require("path");
 const { promises } = require("dns");
 const { Logger } = require("mongodb");
+
+exports.onLogCallback = function (l, prefix) {
+    let logJson = new logModel({
+        timestamp: +new Date,
+        level: l["level"],
+        prefix: prefix,
+        route: l["prefix"],
+        msg: l["message"]
+    });
+    dbController.insertRecord(logJson)
+        .then((res) => { /* Do nothing, log inserted */ })
+        .catch((err) => { /* Do nothing, log cannot be inserted */ })
+}
+
+logger.on("log", function(l) {
+    exports.onLogCallback(l, "helpers.js");
+});
 
 // Initialize data for all movies & series in saved locations.
 // For each folder name in these paths save the following attributes:
@@ -30,9 +49,11 @@ exports.initializeContent = async function (mongoDbController, serverPort) {
         var series = await mongoDbController.getAllCollection(seriesModel);
 
         if("movies" in dirs[0]) {
+            logger.info("initializeContent", "Initializing movies");
             initializeMovies(dirs[0]["movies"], movies);
         }
         if("series" in dirs[0]) {
+            logger.info("initializeContent", "Initializing series");
             initializeSeries(dirs[0]["series"], series);
         }
     }
@@ -49,16 +70,18 @@ async function initializeSettings(serverPort) {
                 return new Promise((resolve, reject) => {
                     dbController.insertRecord(settingsDefaultObj)
                         .then((insertResult) => {
+                            logger.info("initializeSettings", insertResult);
                             resolve(insertResult);
                         })
                         .catch((insertResultError) => {
+                            logger.error("initializeSettings", insertResultError);
                             reject(insertResultError);
                         });
                 });
             }
         })
         .catch((err) => {
-            console.log(err)
+            logger.error("initializeSettings", err);
         });
 }
 
@@ -69,9 +92,11 @@ exports.initializeMoviesOnly = async function (mongoDbController) {
     return new Promise((resolve, reject) => {
         initializeMovies(dirs[0]["movies"], movies)
             .then((init) => {
+                logger.info("initializeMoviesOnly", init);
                 resolve(init);
             })
             .catch((err) => {
+                logger.error("initializeMoviesOnly", err);
                 reject(err);
             })
     });
@@ -84,9 +109,11 @@ exports.initializeSeriesOnly = async function (mongoDbController) {
     return new Promise((resolve, reject) => {
         initializeSeries(dirs[0]["series"], series)
             .then((init) => {
+                logger.info("initializeSeriesOnly", init);
                 resolve(init);
             })
             .catch((err) => {
+                logger.error("initializeSeriesOnly", err);
                 reject(err);
             })
     });
@@ -104,7 +131,7 @@ async function initializeMovies(movies, existingMovies) {
             moviesArray.push(...locationMoviesArr);
         }
         catch (err) {
-            console.error(err);
+            logger.error("initializeMovies", err);
             continue;
         }
     }
@@ -113,9 +140,11 @@ async function initializeMovies(movies, existingMovies) {
     return new Promise((resolve, reject) => {
         dbController.insertBatchRecords(movieModel.collection, moviesArray)
             .then((insertResult) => {
+                logger.info("initializeMovies", insertResult);
                 resolve(insertResult);
             })
             .catch((insertResultError) => {
+                logger.error("initializeMovies", insertResultError);
                 reject(insertResultError);
             });
     });
@@ -133,7 +162,7 @@ async function initializeSeries(series, existingSeries) {
             seriesArray.push(...locationSeriesArr);
         }
         catch (err) {
-            console.error(err);
+            logger.error("initializeSeries", insertResultError);
             continue;
         }
     }
@@ -142,9 +171,11 @@ async function initializeSeries(series, existingSeries) {
     return new Promise((resolve, reject) => {
         dbController.insertBatchRecords(seriesModel.collection, seriesArray)
             .then((insertResult) => {
+                logger.info("initializeSeries", insertResult);
                 resolve(insertResult);
             })
             .catch((insertResultError) => {
+                logger.error("initializeSeries", insertResultError);
                 reject(insertResultError);
             });
     });
@@ -157,6 +188,8 @@ async function addMoviesFromLocation(loc, existingMovies) {
     for(var i=0;i<moviesInLoc.length;i++) {
         const movieName = moviesInLoc[i]["name"];
         const moviePath = loc + movieName
+
+        logger.info("addMoviesFromLocation", "Add movie "+moviePath+" from "+loc);
 
         // Check if subfolder exists.
         if(fs.statSync(moviePath).isDirectory()) {
@@ -218,6 +251,8 @@ async function addSeriesFromLocation(loc, existingSeries) {
         const seriesName = seriesInLoc[i]["name"];
         const seriesPath = loc + seriesName
         
+        logger.info("addSeriesFromLocation", "Add series "+seriesPath+" from "+loc);
+
         // Check if subfolder exists.
         if(fs.statSync(seriesPath).isDirectory()) {
             // Check if same folder has been stored already to database
@@ -260,12 +295,12 @@ async function addSeriesFromLocation(loc, existingSeries) {
             s.push(new seriesModel(seriesObj));
         }
     }
-
-    //console.log(s)
     return s;
 }
 
 exports.createSubBlob = async function (sub) {
+    logger.info("createSubBlob", "Creating subs blob for file "+sub["path"]);
+
     const subFile = fe(sub["path"]);
     return new Promise((resolve, reject) => {
         subFile.detect()
@@ -281,6 +316,8 @@ exports.createSubBlob = async function (sub) {
                 resolve(sub);
             })
             .catch((err) => {
+                logger.error("createSubBlob", err);
+
                 // Set UTF-8 as default encoding for sub
                 sub["encoding"] = "UTF-8";
                 
@@ -304,6 +341,7 @@ function toArrayBuffer(buf) {
 }
 
 exports.startMonitoring = function (delay) {
+    logger.info("startMonitoring", "Starting monitoring service. Time interval: "+delay+" seconds.");
     setInterval(getMonitorStats, delay)
 }
 

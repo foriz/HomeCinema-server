@@ -103,12 +103,13 @@ module.exports = {
         // order = 1 ==> ASC
         // order = -1 ==> DESC
 
+        var sortJson = {};
+        sortJson[sortColumn] = order;
+        
         return new Promise((resolve, reject) => {
             mongoModel
                 .find()
-                .sort({
-                    sortColumn: order
-                })
+                .sort(sortJson)
                 .limit(n)
                 .then(stats => { resolve(stats); })
                 .catch(err => { reject({ "error": err }); })
@@ -140,18 +141,63 @@ module.exports = {
                 console.error("Cannot identify required operation. Ignoring criteria " + JSON.stringify(c));
             }
         }
-
-        console.log(filteringJson)
         
         return new Promise((resolve, reject) => {
             mongoModel
                 .find(filteringJson, function(err, result) {
                     if(err) {
+                        console.error(err);
                         reject(err);
                     }
                     else {
                         resolve(result);
                     }
+                });
+        });
+    },
+
+    filterLastNRecords: async function(mongoModel, criteria, n, sortColumn, order) {
+        // Criteria must be an array containing criteria written in json.
+        // supported criteria: greater (gt), greater equal (gte), equals (eq), less (lt), 
+        //                     less equal (lte), included (in), not equals (ne), not included (nin)
+        // Each json must have the following keys:
+        //            -- field: the column/field name that will be filtered
+        //            -- op: one of [gt, gte, eq, lt, lte, in, ne, nin]
+        //            -- value: value that field will be filtered
+        // included (in) & not included (nin) operations takes as value field an array with values
+
+        // order = 1 ==> ASC
+        // order = -1 ==> DESC
+
+        var sortJson = {};
+        sortJson[sortColumn] = order;
+
+        var filteringJson = {};
+        for (var i=0;i<criteria.length;i++) {
+            const c = criteria[i]
+            
+            if(["eq", "ne", "gt", "gte", "lt", "lte", "in", "nin"].indexOf(c["op"]) > -1) {
+                if(!(c["field"] in filteringJson)) {
+                    filteringJson[c["field"]] = {};
+                }
+                filteringJson[c["field"]]["$"+c["op"]] = c["value"];
+            }
+            else {
+                console.error("Cannot identify required operation. Ignoring criteria " + JSON.stringify(c));
+            }
+        }
+
+        return new Promise((resolve, reject) => {
+            mongoModel
+                .find(filteringJson)
+                .sort(sortJson)
+                .limit(n)
+                .then((records) => {
+                    resolve(records);
+                })
+                .catch((err) => {
+                    console.log(err);
+                    reject({ "error": err });
                 });
         });
     }

@@ -5,7 +5,6 @@ var monitorController = require("../controllers/monitorController");
 
 router.get("/resources", monitorController.getResources);
 router.get("/connections", monitorController.getConnections);
-router.patch("/logs", monitorController.getLogs);
-router.patch("/notifications", monitorController.getNotifications);
+router.get("/logs", monitorController.getLogs);
 
 module.exports = router;

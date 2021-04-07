@@ -1,19 +1,27 @@
 var fs = require("fs");
 var path = require("path")
 
+let configuration = require("../config/config.json");
+let helpers = require("../utils/helpers")
+
 let dbController = require("../controllers/mongoDbController");
 let settingsModel = require("../models/settingsModel");
 
-let configuration = require("../config/config.json");
+var logger = require('npmlog')
+logger.on("log", function(l) {
+    helpers.onLogCallback(l, "/settings");
+});
 
 // Get a list with all available movies in the Database
 exports.getSettings = async function(req, res) {
+    logger.info("/get", req.socket.remoteAddress);
     dbController.getAllCollection(settingsModel)
         .then((settings) => {
             res.setHeader("Content-Type", "application/json");
             res.json( settings[0] );
         })
         .catch((err) => {
+            logger.error("/get", err);
             res.setHeader("Content-Type", "application/json");
             res.json({ "error": err });
         });
@@ -21,6 +29,7 @@ exports.getSettings = async function(req, res) {
 
 // Get a list with all available movies in the Database
 exports.updateSettings = async function(req, res) {
+    logger.info("/update/port="+req.query["port"]+"&protocol="+req.query["protocol"], req.socket.remoteAddress);
     let settingsRecord = {};
 
     dbController.getAllCollection(settingsModel)
@@ -48,6 +57,7 @@ exports.updateSettings = async function(req, res) {
                         res.json( result );
                     })
                     .catch((err) => {
+                        logger.error("/update/port="+req.query["port"]+"&protocol="+req.query["protocol"], err);
                         res.setHeader("Content-Type", "application/json");
                         res.json({ "error": err });
                     });
@@ -74,13 +84,14 @@ exports.updateSettings = async function(req, res) {
                         res.json({ result });
                     })
                     .catch((error) => {
-                        console.log(error)
+                        logger.error("/update/port="+req.query["port"]+"&protocol="+req.query["protocol"], error);
                         res.setHeader("Content-Type", "application/json");
                         res.json({ "error": error });
                     });
             }
         })
         .catch((err) => {
+            logger.error("/update/port="+req.query["port"]+"&protocol="+req.query["protocol"], err);
             res.setHeader("Content-Type", "application/json");
             res.json({ "error": err });
         });

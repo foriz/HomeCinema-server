@@ -1,23 +1,16 @@
 const express = require("express");
 const session = require('express-session')
 
-const dbController = require("./controllers/mongoDbController.js");
-
-let logModel = require("./models/logModel")
-
 var logger = require('npmlog')
 
-logger.on('log', function(l) {
-    let logJson = new logModel({
-        timestamp: +new Date,
-        level: l["level"],
-        prefix: "app.js",
-        route: l["prefix"],
-        msg: l["message"]
-    });
-    dbController.insertRecord(logJson)
-        .then((res) => { /* Do nothing, log inserted */ })
-        .catch((err) => { /* Do nothing, log cannot be inserted */ })
+const dbController = require("./controllers/mongoDbController.js");
+// Initialize connection with MongoDB
+const mongodb = require("./utils/mongodb.js");
+// Helper functions
+const helpers = require("./utils/helpers.js");
+
+logger.on("log", function(l) {
+    helpers.onLogCallback(l, "app.js");
 });
 
 var app = express();
@@ -28,11 +21,6 @@ const config = require("./config/config.json");
 const server_ip = config["server"]["host"];
 const server_port = config["server"]["port"];
 const server_url = "http://" + server_ip + ":" + server_port;
-
-// Initialize connection with MongoDB
-const mongodb = require("./utils/mongodb.js");
-// Helper functions
-const helpers = require("./utils/helpers.js");
 
 // Routers
 var dirsRouter = require("./api/dirsRouter");

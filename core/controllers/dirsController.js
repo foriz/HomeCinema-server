@@ -1,14 +1,23 @@
+const helpers = require("../utils/helpers.js");
+
 let dirsModel = require("../models/dirsModel")
 let dbController = require("../controllers/mongoDbController")
 
+var logger = require('npmlog')
+logger.on("log", function(l) {
+    helpers.onLogCallback(l, "/dirs");
+});
+
 // Get a json array with all dirs for movies & series
 exports.getAllDirs = async function(req, res) {
+    logger.info("/", req.socket.remoteAddress);
     dbController.getAllCollection(dirsModel)
         .then((dirs) => {
             res.setHeader("Content-Type", "application/json");
             res.json( dirs );
         })
         .catch((err) => {
+            logger.error("/", err);
             res.setHeader("Content-Type", "application/json");
             res.json({ "error": err });
         });
@@ -16,12 +25,14 @@ exports.getAllDirs = async function(req, res) {
 
 // Get a json contains dirs only for movies
 exports.getMoviesDirs = async function(req, res) {
+    logger.info("/movies", req.socket.remoteAddress);
     dbController.getSubCollection(dirsModel, "movies")
         .then((movies) => {
             res.setHeader("Content-Type", "application/json");
             res.json( movies ); 
         })
         .catch((err) => {
+            logger.error("/movies", err);
             res.setHeader("Content-Type", "application/json");
             res.json({ "error": err });
         });
@@ -29,6 +40,7 @@ exports.getMoviesDirs = async function(req, res) {
 
 // Add a new movie location in dirs['movies'] json
 exports.addMovieLocation = async function(req, res) {
+    logger.info("/movies/add/path="+req.query.path, req.socket.remoteAddress);
     const locationToAdd = req.query.path;
     dbController.getAllCollection(dirsModel)
         .then((dirs) => {
@@ -45,6 +57,7 @@ exports.addMovieLocation = async function(req, res) {
                         res.json( insertResult );
                     })
                     .catch((insertResultError) => {
+                        logger.error("/movies/add/path="+req.query.path, insertResultError);
                         res.setHeader("Content-Type", "application/json");
                         res.json( insertResultError );
                     });
@@ -67,6 +80,7 @@ exports.addMovieLocation = async function(req, res) {
                             res.json( updateResult );
                         })
                         .catch((updateResultError) => {
+                            logger.error("/movies/add/path="+req.query.path, updateResultError);
                             res.setHeader("Content-Type", "application/json");
                             res.json( updateResultError );
                         });
@@ -74,6 +88,7 @@ exports.addMovieLocation = async function(req, res) {
             }
         })
         .catch((err) => {
+            logger.error("/movies/add/path="+req.query.path, err);
             res.setHeader("Content-Type", "application/json");
             res.json({ "error": err });
         });
@@ -81,6 +96,7 @@ exports.addMovieLocation = async function(req, res) {
 
 // Delete a new movie location in dirs['movies'] json
 exports.deleteMovieLocation = async function(req, res) {
+    logger.info("/movies/delete/path="+req.query.path, req.socket.remoteAddress);
     const locationToRemove = req.query.path
     dbController.getAllCollection(dirsModel)
         .then((dirs) => {
@@ -97,6 +113,7 @@ exports.deleteMovieLocation = async function(req, res) {
                         res.json( deleteResult );
                     })
                     .catch((deleteResultError) => {
+                        logger.error("/movies/delete/path="+req.query.path, deleteResultError);
                         res.setHeader("Content-Type", "application/json");
                         res.json( deleteResultError );
                     });
@@ -107,6 +124,7 @@ exports.deleteMovieLocation = async function(req, res) {
             }
         })
         .catch((err) => {
+            logger.error("/movies/delete/path="+req.query.path, err);
             res.setHeader("Content-Type", "application/json");
             res.json({ "error": err });
         });
@@ -114,12 +132,14 @@ exports.deleteMovieLocation = async function(req, res) {
 
 // Get a json contains dirs only for series
 exports.getSeriesDirs = async function(req, res) {
+    logger.info("/series", req.socket.remoteAddress);
      dbController.getSubCollection(dirsModel, "series")
         .then((series) => {
             res.setHeader("Content-Type", "application/json");
             res.json( series );
         })
         .catch((err) => {
+            logger.error("/series", err);
             res.setHeader("Content-Type", "application/json");
             res.json({ "error": err });
         });
@@ -127,6 +147,7 @@ exports.getSeriesDirs = async function(req, res) {
 
 // Add a new series location in dirs['series'] json
 exports.addSeriesLocation = async function(req, res) {
+    logger.info("/series/add/path="+req.query.path, req.socket.remoteAddress);
     const locationToAdd = req.query.path;
     dbController.getAllCollection(dirsModel)
         .then((dirs) => {
@@ -144,6 +165,7 @@ exports.addSeriesLocation = async function(req, res) {
                         res.json( insertResult );
                     })
                     .catch((insertResultError) => {
+                        logger.error("/series/add/path="+req.query.path, insertResultError);
                         res.setHeader("Content-Type", "application/json");
                         res.json( insertResultError );
                     });
@@ -166,6 +188,7 @@ exports.addSeriesLocation = async function(req, res) {
                             res.json( updateResult );
                         })
                         .catch((updateResultError) => {
+                            logger.error("/series/add/path="+req.query.path, updateResultError);
                             res.setHeader("Content-Type", "application/json");
                             res.json( updateResultError );
                         });
@@ -173,6 +196,7 @@ exports.addSeriesLocation = async function(req, res) {
             }
         })
         .catch((err) => {
+            logger.error("/series/add/path="+req.query.path, err);
             res.setHeader("Content-Type", "application/json");
             res.json({ "error": err });
         });
@@ -180,6 +204,7 @@ exports.addSeriesLocation = async function(req, res) {
 
 // Delete a new series location in dirs['series'] json
 exports.deleteSeriesLocation = async function(req, res) {
+    logger.info("/series/delete/path="+req.query.path, req.socket.remoteAddress);
     const locationToRemove = req.query.path
     dbController.getAllCollection(dirsModel)
         .then((dirs) => {
@@ -196,6 +221,7 @@ exports.deleteSeriesLocation = async function(req, res) {
                         res.json( deleteResult );
                     })
                     .catch((deleteResultError) => {
+                        logger.error("/series/delete/path="+req.query.path, deleteResultError);
                         res.setHeader("Content-Type", "application/json");
                         res.json( deleteResultError );
                     });
@@ -206,6 +232,7 @@ exports.deleteSeriesLocation = async function(req, res) {
             }
         })
         .catch((err) => {
+            logger.error("/series/delete/path="+req.query.path, err);
             res.setHeader("Content-Type", "application/json");
             res.json({ "error": err });
         });
