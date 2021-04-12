@@ -1,4 +1,5 @@
-const { ipcRenderer } = require("electron")
+const { ipcRenderer } = require("electron");
+const { model } = require("mongoose");
 
 var movies_btn = null;
 var series_btn = null;
@@ -14,14 +15,14 @@ var dirs = null;
 
 var SERVER_URL = "";
 
-document.onreadystatechange = function(e) {
+var modalTemplate
+
+window.onload = function() {
     if (document.readyState === 'complete') {
         config = ipcRenderer.sendSync("synchronous-message", "config");
         SERVER_URL = "http://" + config["server"]["host"] + ":" + config["server"]["port"]; 
     }
-};
 
-window.onload = function() {
     if(SERVER_URL == "") {
         SERVER_URL = "http://localhost:3000"; 
     }
@@ -82,7 +83,7 @@ function hasClass(elem, class_name) {
     }
 }
 
-function setToolActive(elem) {
+function setToolActive(elem, op) {
     // Check if it is already selected
     if(!hasClass(elem, "active_tool")) {
         // Set to active class
@@ -95,16 +96,7 @@ function setToolActive(elem) {
             }
         }
 
-        // Change pic to selected
-        elem.src = elem.src.replace(".svg", "_selected.svg");
-
-        // Open modal(pop-up) window
-        if(isModalShown) {
-            changeModalContent();
-        }
-        else {
-            openModal();
-        }
+        openModal(elem, op);
     }
 }
 
@@ -115,15 +107,40 @@ function setToolInactive(elem) {
     }
 }
 
-function openModal() {
-    /* TODO: uncomment it
-    var modal = document.getElementById("modal");
-    modal.style.display = "block";
+function openModal(elem, op) {
+    var modal = new tingle.modal({
+        footer: true,
+        stickyFooter: false,
+        closeMethods: ['button'],
+        closeLabel: "Close",
+        cssClass: ['custom-class-1', 'custom-class-2'],
+        onClose: function() {
+            console.log('modal closed');
+        },
+        beforeClose: function() {
+            return true;
+            return false;
+        }
+    });
+    
+    // Footer Buttons
+    modal.addFooterBtn('Save', 'tingle-btn tingle-btn--primary', function() {
+        // Save content and close modal
+        modal.close();
+    });
+    modal.addFooterBtn('Close', 'tingle-btn tingle-btn--danger', function() {
+        // Close modal without saving
+        modal.close();
+    });
 
-    // TODO: implement different function for each tool that can open modal
+    // Main Content
+    modal.setContent('');
+    modal.setContent(''
+        + '<label for="fname">First name:</label>'
+        + '<input type="text" id="fname" name="fname">'
+    +'');
 
-    isModalShown = true;
-    */
+    modal.open();
 }
 
 function closeModal() {
@@ -153,34 +170,26 @@ function moviesBtnClick() {
     movies_btn.classList.add("active");
     series_btn.classList.remove("active");
 
-    showLoader();
-
-    dirs = requestApi("GET", "/dirs/movies", "Cannot fetch saved locations for movies & series.");
+    dirs = requestApi("GET", "/dirs/movies", "Cannot fetch saved locations for movies & series.", false);
     
     cleanTable();
     initializeTable("Movies");
     if(dirs != null) {
         fillTable(dirs);
     }
-
-    hideLoader();
 }
 
 function seriesBtnClick() {
     series_btn.classList.add("active");
     movies_btn.classList.remove("active");
 
-    showLoader();
-
-    dirs = requestApi("GET", "/dirs/series", "Cannot fetch saved locations for movies & series.");
+    dirs = requestApi("GET", "/dirs/series", "Cannot fetch saved locations for movies & series.", false);
     
     cleanTable();
     initializeTable("Series");
     if(dirs != null) {
         fillTable(dirs);
     }
-
-    hideLoader();
 }
 
 function changeActiveRow(evt) {
@@ -234,9 +243,8 @@ function updatePaths(operation) {
     }
 
     update_route = "/dirs" + update_route_dst + update_route_op + "?path=" + selected_path;
-    update_response = requestApi("PATCH", update_route, "Cannot update dirs locations.");
+    update_response = requestApi("PATCH", update_route, "Cannot update dirs locations.", false);
 
-    console.log(update_response);
     if(update_response.hasOwnProperty("success")) {
         if(hasClass(movies_btn, "active")) {
             moviesBtnClick();
@@ -250,14 +258,20 @@ function updatePaths(operation) {
     }
 }
 
-function requestApi(type, route, error_msg) {
+function requestApi(type, route, error_msg, async) {
     let request = new XMLHttpRequest();
-    request.open(type, SERVER_URL + route, false);
-    request.send();
-    if(request.status == 200) {
-        return JSON.parse(request.response);
+    try {
+        request.open(type, SERVER_URL + route, async);
+        request.send();
+        if(request.status == 200) {
+            return JSON.parse(request.response);
+        }
+        else {
+            alert("[ERROR " + request.status + "][" + request.statusText + "]: " + error_msg);
+            return null;
+        }
     }
-    else {
+    catch(e) {
         alert("[ERROR " + request.status + "][" + request.statusText + "]: " + error_msg);
         return null;
     }

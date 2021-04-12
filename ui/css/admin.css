@@ -168,6 +168,11 @@
     text-align: center;
 }
 
+table tbody {
+    width: 100%;
+    display: block;
+}
+
 tr {
     width: 100%;
     display: inline-block;
@@ -227,7 +232,6 @@ tr td div {
     color: var(--header_btn_active_txt_color);
 }
 
-/* Modal Windows */
 .modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
@@ -239,26 +243,9 @@ tr td div {
     overflow: auto; /* Enable scroll if needed */
     background-color: rgb(0,0,0); /* Fallback color */
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-  }
-  
-  /* Modal Content/Box */
-  .modal-content {
-    background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
-  }
-  
-  /* The Close Button */
-  .close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-  }
+}
 
-  /* Loader */
+/* Loader */
 .loader_wrapper {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
@@ -271,25 +258,11 @@ tr td div {
     background-color: var(--loader_bg_color) /* Black w/ opacity */
 }
 
-.loader {
+.loader_wrapper img {
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
     left: 40%;
     top: 40%;
-    width: 120px;
-    height: 120px;
-    border: 16px solid var(--loader_sec_color);
-    border-radius: 50%;
-    border-top: 16px solid var(--loader_color);
-    -webkit-animation: spin 2s linear infinite; /* Safari */
-    animation: spin 2s linear infinite;
-}
-
-.loader_wrapper img {
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
-    left: 35%;
-    top: 23%;
     width: 181px;
 
     text-align: center;

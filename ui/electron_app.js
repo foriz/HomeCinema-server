@@ -5,8 +5,10 @@ const server = require('../core/app.js');
 
 function createWindow () {
   const win = new BrowserWindow({
-    width: 800,
-    height: 760,
+    //width: 800,
+    //height: 760,
+    width: 1500,
+    height: 1000,
     resizable: false,
     webPreferences: {
       nodeIntegration: true,
@@ -15,7 +17,7 @@ function createWindow () {
   })
 
   win.loadFile('ui/admin.html')
-  //win.webContents.openDevTools()
+  win.webContents.openDevTools()
 }
 
 app.whenReady().then(createWindow)

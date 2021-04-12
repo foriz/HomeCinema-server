@@ -4,7 +4,9 @@
     <head>
         <link rel="stylesheet" href="css/w3.css">
         <link rel="stylesheet" href="css/admin.css">
+        <link rel="stylesheet" href="css/tingle.min.css">
         <script type="text/javascript" src="js/admin.js"></script>
+        <script type="text/javascript" src="js/tingle.min.js"></script>
     </head>    
 
     <body>
@@ -23,14 +25,14 @@
             <!-- buttons about movies/series -->
             <div class="header-nav">
                 <button class="w3-button" id="movies_btn" onclick="moviesBtnClick()">Movies</button>
-                <button class="w3-button" id="series_btn" onclick="seriesBtnClick()" disabled>Series</button>
+                <button class="w3-button" id="series_btn" onclick="seriesBtnClick()">Series</button>
             </div>
             <!-- buttons about settings/connections/monitor/notifications -->
             <div class="header-control">
-                <img src="img/settings.svg" id="settings_btn" alt="Settings" title="Settings" onclick="setToolActive(this)" disabled>
-                <img src="img/connections.svg" id="connections_btn" alt="Connections" title="Connections" onclick="setToolActive(this)" disabled>
-                <img src="img/monitor.svg" id="monitor_btn" alt="Monitor" title="Monitor" onclick="setToolActive(this)" disabled>
-                <img src="img/notifications.svg" id="notifications_btn" alt="Notifications" title="Notifications" onclick="setToolActive(this)" disabled>
+                <img src="img/settings.svg" id="settings_btn" alt="Settings" title="Settings" onclick="setToolActive(this, 'settings')">
+                <img src="img/connections.svg" id="connections_btn" alt="Connections" title="Connections" onclick="setToolActive(this, 'connections')" disabled>
+                <img src="img/monitor.svg" id="monitor_btn" alt="Monitor" title="Monitor" onclick="setToolActive(this, 'monitor')" disabled>
+                <img src="img/notifications.svg" id="notifications_btn" alt="Notifications" title="Notifications" onclick="setToolActive(this, 'notifications')" disabled>
             </div>
         </div>
 
@@ -41,11 +43,6 @@
             <div class="content-control">
                 <img src="img/add.svg" id="add_btn" alt="Add Path" title="Add Path" onclick="updatePaths('add')">
                 <img src="img/delete.svg" id="delete_btn" alt="Delete Selected Path" title="Delete Selected Path" onclick="updatePaths('delete')">
-            </div>
-
-            <!-- Modal Windows -->
-            <div id="modal" class="modal">
-                <span class="close" onclick="closeModal()">&times;</span>
             </div>
         </div>
 
