@@ -1,4 +1,4 @@
-const { ipcRenderer } = require("electron");
+const { ipcRenderer, protocol } = require("electron");
 const { model } = require("mongoose");
 
 var movies_btn = null;
@@ -111,34 +111,155 @@ function openModal(elem, op) {
     var modal = new tingle.modal({
         footer: true,
         stickyFooter: false,
-        closeMethods: ['button'],
+        closeMethods: ['overlay', 'button', 'escape'],
         closeLabel: "Close",
         cssClass: ['custom-class-1', 'custom-class-2'],
         onClose: function() {
-            console.log('modal closed');
+            // Close modal without saving
+            setToolInactive(elem);
         },
         beforeClose: function() {
             return true;
-            return false;
         }
     });
     
     // Footer Buttons
     modal.addFooterBtn('Save', 'tingle-btn tingle-btn--primary', function() {
         // Save content and close modal
+        if(op == "settings") {
+            var serverPort = document.getElementById("server_port").value;
+            var serverProtocol = "HTTP";
+
+            var protocols = document.getElementsByName("streaming_protocol");
+            for (var i = 0; i < protocols.length; i++) {
+                if (protocols[i].checked) {
+                    serverProtocol = protocols[i].value;
+                    break;
+                }
+            }
+
+            var serverResponse = requestApi("PATCH", "/settings/update?port="+serverPort+"&protocol="+serverProtocol, "Cannot fetch saved settings.", false);    
+            if("success" in serverResponse["result"]) {
+                alert('Settings updated!');
+            }
+            else {
+                alert('An error occured. Cannot update settings.');
+            }
+        }
+        setToolInactive(elem);
         modal.close();
     });
     modal.addFooterBtn('Close', 'tingle-btn tingle-btn--danger', function() {
-        // Close modal without saving
         modal.close();
     });
 
     // Main Content
-    modal.setContent('');
-    modal.setContent(''
-        + '<label for="fname">First name:</label>'
-        + '<input type="text" id="fname" name="fname">'
-    +'');
+    if(op == "settings") {
+        var curSettings = requestApi("GET", "/settings/get", "Cannot fetch saved settings.", false);
+
+        var protocolSwitchStr = ''
+            + '<label class="checkbox-inline">'
+            + '<input type="radio" value="HTTP" name="streaming_protocol">HTTP'
+            + '</label>'
+            + '<label class="checkbox-inline">'
+            + '<input type="radio" value="RTP" name="streaming_protocol">RTP/RTSP'
+            + '</label>'
+            + '<label class="checkbox-inline">'
+            + '<input type="radio" value="DASH" name="streaming_protocol">DASH'
+            + '</label>'
+            + '<label class="checkbox-inline">'
+            + '<input type="radio" value="HLS" name="streaming_protocol">HLS'
+            + '</label>'
+            + '<label class="checkbox-inline">'
+            + '<input type="radio" value="WRTC" name="streaming_protocol">WebRTC'
+            + '</label>'
+        switch(curSettings.protocol) {
+            case 'HTTP':
+                protocolSwitchStr = protocolSwitchStr.replace(
+                    '<input type="radio" value="HTTP" name="streaming_protocol">HTTP', 
+                    '<input type="radio" value="HTTP" name="streaming_protocol" checked>HTTP'
+                )
+                break;
+            case 'RTP':
+                protocolSwitchStr = protocolSwitchStr.replace(
+                    '<input type="radio" value="RTP" name="streaming_protocol">RTP/RTSP', 
+                    '<input type="radio" value="RTP" name="streaming_protocol" checked>RTP/RTSP'
+                )
+                break;
+            case 'DASH':
+                protocolSwitchStr = protocolSwitchStr.replace(
+                    '<input type="radio" value="DASH" name="streaming_protocol">DASH', 
+                    '<input type="radio" value="DASH" name="streaming_protocol" checked>DASH'
+                )
+                break;
+            case 'HLS':
+                protocolSwitchStr = protocolSwitchStr.replace(
+                    '<input type="radio" value="HLS" name="streaming_protocol">HLS', 
+                    '<input type="radio" value="HLS" name="streaming_protocol" checked>HLS'
+                )
+                break;
+            case 'WRTC':
+                protocolSwitchStr = protocolSwitchStr.replace(
+                    '<input type="radio" value="WRTC" name="streaming_protocol">WebRTC', 
+                    '<input type="radio" value="WRTC" name="streaming_protocol" checked>WebRTC'
+                )
+                break;
+        }
+
+        modal.setContent(''
+            + '<form id="test">'
+            + '<label for="server_port">Server Port:</label>'
+            + '<input type="number" id="server_port" name="server_port" value=' + curSettings.port + '>'
+            + '<br>'
+            + '<br>'
+            + protocolSwitchStr
+            + '<br>'
+            + '<h5 style="color: red;">WARNING: For now, only HTTP protocol is supported.</h5>'
+            + '</form>'
+        +'');
+    }
+    else if(op == "connections") {
+        var connections = requestApi("GET", "/monitor/connections", "Cannot fetch saved connections.", false);
+        
+        var sessionsStr = '';
+        for(var i=0;i<connections["sessions"].length;i++) {
+            sessionsStr = sessionsStr + '<tr><td>'+connections["sessions"][i].session_id+'</td></tr>';
+        }
+
+        modal.setContent(''
+            + '<table style="width:75%"'
+            + '<tr>'
+            + '<th>Session Id</th>'
+            + '</tr>'
+            + '<tr>'
+            + sessionsStr
+            + '</tr>'
+            + '</table>'
+        +'');
+    }
+    else if(op == "monitor") {
+        var resources = requestApi("GET", "/monitor/resources?n_logs=1", "Cannot fetch saved monitor logs.", false);
+        console.log(resources);
+        // TODO: some plots for resources monitoring
+    }
+    else if(op == "notifications") {
+        var logs = requestApi("GET", "/monitor/logs?n_logs=10", "Cannot fetch saved logs.", false);
+
+        var logsStr = ''
+        for(var i=0;i<logs.length;i++) {
+            var logId = "log-" + i
+            logsStr = logsStr
+                + '<label for="'+logId+'">['+logs[0].timestamp+']['+logs[0].prefix+'/'+logs[0].route+']</label><br>'
+                + '<textarea id="'+logId+'" readonly style="width:100%">'+logs[0].msg+'</textarea><br>'
+        }
+        
+        // TODO: timestamp to datetime
+        // TODO: make textartea bigger and modal scrollable and equal to parent
+
+        modal.setContent( ''
+            + logsStr
+            +'');
+    }
 
     modal.open();
 }
