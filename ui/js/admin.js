@@ -240,7 +240,53 @@ function openModal(elem, op) {
     else if(op == "monitor") {
         var resources = requestApi("GET", "/monitor/resources?n_logs=1", "Cannot fetch saved monitor logs.", false);
         console.log(resources);
-        // TODO: some plots for resources monitoring
+
+        var statsStr = ''
+            + '<div id="banner-1" style="width:100%; height:50px; margin:auto;">'
+            + '     <div id="banner-11" style="width:48%; height:inherit; float:left; margin:auto;">'
+            + '             <div class=".inner" style="width:100%; height:50%; margin:auto;">'
+            + '                     OS: '+resources[0]["os"]
+            + '             </div>'
+            + '     </div>'
+            + '     <div id="banner-12" style="width:48%; height:inherit; float:right; margin:auto;">'
+            + '             <div class=".inner" style="width:100%; height:50%; margin:auto;">'
+            + '                     Up(h): '+parseFloat(parseInt(resources[0]["sys_uptime"])/3600).toFixed(2)
+            + '             </div>'
+            + '     </div>'
+            + '</div>'
+            + '<div id="banner-2" style="width:100%; height:50px; margin:auto;">'
+            + '     <div id="banner-21" style="width:48%; height:inherit; float:left; margin:auto;">'
+            + '             <div class=".inner" style="width:100%; height:50%; margin:auto;">'
+            + '                     CPU: '+parseFloat(resources[0]["cpu_usage"]).toFixed(2)+'%'
+            + '             </div>'
+            + '     </div>'
+            + '     <div id="banner-22" style="width:48%; height:inherit; float:right; margin:auto;">'
+            + '             <div class=".inner" style="width:100%; height:50%; margin:auto;">'
+            + '                     RAM: '+parseFloat(resources[0]["mem_usage"]).toFixed(2)+'%'
+            + '             </div>'
+            + '     </div>'
+            + '</div>'
+            + '<div id="banner-3" style="width:100%; height:50px; margin:auto;">'
+            + '     <div id="banner-31" style="width:30%; height:inherit; float:left; margin:auto; margin-right:5%;">'
+            + '             <div class=".inner" style="width:100%; height:50%; margin:auto;">'
+            + '                     Avg Load(1m): '+parseFloat(resources[0]["avg_load_1_min"]).toFixed(2)
+            + '             </div>'
+            + '     </div>'
+            + '     <div id="banner-32" style="width:30%; height:inherit; float:left; margin:auto;">'
+            + '             <div class=".inner" style="width:100%; height:50%; margin:auto;">'
+            + '                     Avg Load(5m): '+parseFloat(resources[0]["avg_load_5_min"]).toFixed(2)
+            + '             </div>'
+            + '     </div>'
+            + '     <div id="banner-33" style="width:30%; height:inherit; float:right; margin:auto;">'
+            + '             <div class=".inner" style="width:100%; height:50%; margin:auto;">'
+            + '                     Avg Load(15m): '+parseFloat(resources[0]["avg_load_15_min"]).toFixed(2)
+            + '             </div>'
+            + '     </div>'
+            + '</div>';
+            
+        modal.setContent( ''
+        + statsStr
+        +'');
     }
     else if(op == "notifications") {
         var logs = requestApi("GET", "/monitor/logs?n_logs=10", "Cannot fetch saved logs.", false);
@@ -249,13 +295,10 @@ function openModal(elem, op) {
         for(var i=0;i<logs.length;i++) {
             var logId = "log-" + i
             logsStr = logsStr
-                + '<label for="'+logId+'">['+logs[0].timestamp+']['+logs[0].prefix+'/'+logs[0].route+']</label><br>'
-                + '<textarea id="'+logId+'" readonly style="width:100%">'+logs[0].msg+'</textarea><br>'
+                + '<label for="'+logId+'">['+convertTimestampToDatetime(logs[0].timestamp)+']['+logs[0].prefix+'/'+logs[0].route+']</label><br>'
+                + '<textarea id="'+logId+'" readonly style="width:100%; height:150px">'+logs[0].msg+'</textarea><br>'
         }
         
-        // TODO: timestamp to datetime
-        // TODO: make textartea bigger and modal scrollable and equal to parent
-
         modal.setContent( ''
             + logsStr
             +'');
@@ -396,4 +439,15 @@ function requestApi(type, route, error_msg, async) {
         alert("[ERROR " + request.status + "][" + request.statusText + "]: " + error_msg);
         return null;
     }
+}
+
+function convertTimestampToDatetime(unix_timestamp) {
+    var date = new Date(unix_timestamp);
+
+    var hours = date.getHours();
+    var minutes = "0" + date.getMinutes();
+    var seconds = "0" + date.getSeconds();
+
+    var formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+    return formattedTime;
 }
